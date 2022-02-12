@@ -19,7 +19,7 @@ typedef struct {
     VecR r; // position of particle
     real theta; // unit vector showing velocity direction
     VecR force; //force displacing the particle this step
-    real rotD; // rotational diffusion constant
+    real Pe; // Peclet number
     real decayTimer; //Time it takes to go back to less persistent state
     int color; //red = 0, green =1 , persistent green = 2
 } particle ;
