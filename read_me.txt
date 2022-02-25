@@ -1,9 +1,11 @@
 
 
+-The area always has the origin in the bottom left corner, i.e. extends into the top right quadrant
 
-All length are multiples of the cell diameter, i.e. the area covered by a cell is 0.785398.
 
-Parameter files have to be of the form :
+-All length are multiples of the cell diameter, i.e. the area covered by a cell is 0.785398.
+
+-Parameter files have to be of the form :
 paramName1          : paramValue1
 ...
 

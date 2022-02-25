@@ -9,6 +9,7 @@
 
 /*
 In general
+- restructure the data analysis files to all be in one folder
 - efficient interaction check
 - do input files 
 - do parallelisation
@@ -20,9 +21,6 @@ In general
 - do updates to stdout
 - save non-periodic positions
 - random initial conditions -> steepest decent to minimize overlaps
-- fix harmonic potential
-- use D to non-dimensionalise instead of v0 to get peclet numbers
-- initialise with volume fraction phi
 */
 
 
@@ -41,10 +39,10 @@ int nGreenParticles;
 int nRedParticles;
 real stepDuration;
 VecR region;  //Size of the simulation region
-real redPe, greenPe, greenPlusPe; //rotational diffusion constants 
+real redD, greenD, greenPlusD; //rotational diffusion constants 
 real k;  //potential strength
 real tau; //decay time of the persistent state
-real v0; //self-propulsion velocity
+real Pe; //self-propulsion velocity
 real sigma; //interaction distance, sigma>1 creates stickyness
 real measurementInterval; //at the end of each interval we measure all observables
 int nMeasurements;

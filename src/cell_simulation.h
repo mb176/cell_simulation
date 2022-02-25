@@ -16,7 +16,7 @@ double getNextParameter(FILE * file, char * parameterName){
     if (fgets(line,MAX_LINE_LENGTH,file)) {
         sscanf(line, "%s : %s", name, value);
     } 
-    assert(*name==*parameterName); //Invalid parameter or parameter out of order or not enough parameters
+    assert(strcmp(name,parameterName)==0); //Do the names match? If not it's an invalid parameter or parameter out of order or not enough parameters
     char * ptr; //Throughaway, needed to call strtod
     double val = strtod(value,&ptr);
     printf("%s = %f \n",name,val);
@@ -30,7 +30,7 @@ void SetParameters(int argc, char ** argv){
     //char * NAME = argv[2];
 
     FILE * file;
-    file = fopen(PATH,"r");
+    file = fopen(PATH,"r+");
     
     //Read out parameters
     stepLimit = getNextParameter(file, "stepLimit");
@@ -39,15 +39,13 @@ void SetParameters(int argc, char ** argv){
     stepDuration = getNextParameter(file, "stepDuration");
     measurementInterval = getNextParameter(file, "measurementInterval");
     real areaFraction = getNextParameter(file, "areaFraction");
-    redPe = getNextParameter(file, "redPe");
-    greenPe = getNextParameter(file, "greenPe");
-    greenPlusPe = getNextParameter(file, "greenPlusPe");
+    redD = getNextParameter(file, "redD");
+    greenD = getNextParameter(file, "greenD");
+    greenPlusD = getNextParameter(file, "greenPlusD");
     k = getNextParameter(file, "k");
     tau = getNextParameter(file, "tau");
-    v0 = getNextParameter(file, "v0");
+    Pe = getNextParameter(file, "Pe");
     sigma = getNextParameter(file, "sigma");
-
-    fclose(file);
 
     // Barricades
     //measurementInterval must be a multiple of stepDuration
@@ -76,8 +74,14 @@ void SetParameters(int argc, char ** argv){
     rng = xoshiro256ss_init(seed);
     srand(seed);
 
-    char  suffix[] = "_tracks";
+    char  suffix[] = "_tracks.csv";
     tracksFile = fopen(strcat(PATH,suffix),"w");
+
+    //append the file
+    //fprintf(file, "Secondary paramters:\n");
+    fprintf(file, "nParticles : %i\n",nParticles);
+    fprintf(file, "Length : %f\n",length);
+    fclose(file);
 }
 
 void AllocArrays(){
@@ -124,13 +128,13 @@ void InitialisePositions(){
 void InitialiseColor(){
     //Green particles
     for(int particleIdx = 0; particleIdx < nGreenParticles; particleIdx++){
-        particles[particleIdx].Pe = greenPe;
+        particles[particleIdx].D = greenD;
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 1;
     }
     //Red particles
     for(int particleIdx = nGreenParticles; particleIdx < nGreenParticles + nRedParticles; particleIdx++){
-        particles[particleIdx].Pe = redPe;
+        particles[particleIdx].D = redD;
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 0;
     }
@@ -197,12 +201,12 @@ void ComputeInteractions(){
                     //Persistence change (no refreshing)
                     if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
                         particles[pIdx1].color = 2;
-                        particles[pIdx1].Pe = greenPlusPe;
+                        particles[pIdx1].D = greenPlusD;
                         particles[pIdx1].decayTimer = tau;
                     }
                     else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                         particles[pIdx2].color = 2;
-                        particles[pIdx2].Pe = greenPlusPe;
+                        particles[pIdx2].D = greenPlusD;
                         particles[pIdx2].decayTimer = tau;
                     }
 
@@ -221,7 +225,7 @@ void EulerMaruyamaR(){
         //Self propulsion
         velocity.x = cos(particles[particleIdx].theta); //ToDo: Can we get less calls to sin/ cos here?
         velocity.y = sin(particles[particleIdx].theta); //WARNING: not 3d compatible
-        VVSAdd(particles[particleIdx].r,stepDuration*v0,velocity);
+        VVSAdd(particles[particleIdx].r,stepDuration*Pe,velocity);
 
         //Forces
         VVSAdd(particles[particleIdx].r,stepDuration,particles[particleIdx].force);
@@ -242,7 +246,7 @@ void EulerMaruyamaTheta(){
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
         noiseCount = noiseCount % 2;
         if (noiseCount == 0) xoshiro256ss_normal(noise, &rng);
-        particles[particleIdx].theta += rootStepDuration*root2*particles[particleIdx].Pe*noise[noiseCount];
+        particles[particleIdx].theta += rootStepDuration*root2*particles[particleIdx].D*noise[noiseCount];
         noiseCount++;
     }
 }
@@ -260,7 +264,7 @@ void UpdatePersistence(){
             particles[particleIdx].decayTimer -= stepDuration;
             if(particles[particleIdx].decayTimer <= 0){
                 particles[particleIdx].color = 1; 
-                particles[particleIdx].Pe = greenPe;
+                particles[particleIdx].D = greenD;
                 particles[particleIdx].decayTimer = 0;
             }
         }

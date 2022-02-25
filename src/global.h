@@ -12,10 +12,10 @@ extern int nGreenParticles;
 extern int nRedParticles;
 extern real stepDuration;
 extern VecR region;  //Size of the simulation region
-extern real redPe, greenPe, greenPlusPe; //rotational diffusion constants 
+extern real redD, greenD, greenPlusD; //rotational diffusion constants 
 extern real k;  //potential strength
 extern real tau; //decay time of the persistent state
-extern real v0; //self-propulsion velocity
+extern real Pe; //self-propulsion velocity
 extern real sigma; //interaction distance, sigma>1s creates stickyness
 extern real measurementInterval; //at the end of each interval we measure all observables
 extern int nMeasurements;
