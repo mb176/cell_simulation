@@ -1,0 +1,16 @@
+stepLimit               : 100000
+nGreenParticles         : 900
+nRedParticles           : 900
+stepDuration            : 0.001
+measurementInterval     : 1
+areaFraction            : 0.9
+redD                    : 1
+greenD                  : 1
+greenPlusD              : 0.01
+k                       : 5
+tau                     : 2
+Pe                      : 5
+sigma                   : 1.1
+nParticles : 1800
+Length : 39.633269
+
