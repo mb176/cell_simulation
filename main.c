@@ -56,6 +56,10 @@ VecR ** positionMeasurements;
 real * measurementTimes;
 int ** colorMeasurements;
 FILE * tracksFile;
+VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
+int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
+//indices of next particle in the cell, the last entries contain indices to first 
+//particle in that cell
 
 int main(int argc, char **argv){
     
@@ -67,6 +71,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     clock_t t;
     t = clock();
     printf("Begin Simulation... \n");
+
     SetParameters(argc, argv);
     SetUpJob();
     for(int stepIdx = 0; stepIdx < stepLimit; stepIdx++){
@@ -74,6 +79,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     }
     writeTracks();
     cleanup();
+
     t = clock() - t;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("Simulation ended after %f seconds \n",time_taken);

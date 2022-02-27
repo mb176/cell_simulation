@@ -58,6 +58,15 @@ typedef struct {
     (v1).y = (v2).y /(v3).y
 
 
+#define VLinear(p,s)  \
+    (p).y*(s).x+(p).x
+//Linearises a pair of row and column indices p into a single index based on the 
+// row length s.x
+
+
+
+
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Periodic boundaries ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 //Wraps tangent vectors, i.e. those that leave the top right quadrant
 //assumes (rectangular) boundary is given as VecR region
@@ -74,6 +83,19 @@ typedef struct {
 #define VWrapAll(v) \
     {VWrap(v,x); \
      VWrap(v,y);}
+
+#define VCellWrap(cellIdx,t)    \
+    if (cellIdx.t >= cells.t) { \
+        cellIdx.t = 0;          \
+    } else if (cellIdx.t < 0) { \
+        cellIdx.t = cells.t - 1;\
+    }
+
+//Requires cells to be defined there
+#define VCellWrapAll(cellIdx)   \
+    {VCellWrap (cellIdx,x);     \
+    VCellWrap (cellIdx,y);      \
+    }
 
 
 #endif

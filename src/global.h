@@ -30,5 +30,9 @@ extern VecR ** positionMeasurements;
 extern real * measurementTimes;
 extern int ** colorMeasurements;
 extern FILE * tracksFile;
+VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
+int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
+//indices of next particle in the cell, the last entries contain indices to first 
+//particle in that cell
 
 #endif

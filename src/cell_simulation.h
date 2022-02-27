@@ -68,11 +68,17 @@ void SetParameters(int argc, char ** argv){
     printf("length=%f \n",length);
     region = (VecR) {.x = length,
                      .y = length};  //Size of the simulation region
+    cells.x = region.x/(sigma); //Smallest cells that are larger than interaction range
+    cells.y = region.y/(sigma);
+
+
 
     nMeasurements = stepLimit*stepDuration/measurementInterval; 
-    seed = time(NULL);
+    seed = 1;//time(NULL);
     rng = xoshiro256ss_init(seed);
     srand(seed);
+
+
 
     char  suffix[] = "_tracks.csv";
     tracksFile = fopen(strcat(PATH,suffix),"w");
@@ -87,6 +93,8 @@ void SetParameters(int argc, char ** argv){
 void AllocArrays(){
     //Particle array
     particles = (particle *) malloc(nParticles*(sizeof(particle)));
+    //Linked list for cells
+    cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
     //Measurement arrays
     measurementTimes = (real *) malloc(nMeasurements*sizeof(real));
     positionMeasurements = (VecR **) malloc(nMeasurements*sizeof(VecR *));
@@ -180,41 +188,116 @@ void SetUpJob(){
 real HarmonicForce(real distance){
     return -k/distance*(distance-1); //WARNING: this needs to be changed if we don't measure in units of sigma
 }
+// void ComputeInteractions(){
+//     //Delete old force values
+//     for(int particleIdx = 0; particleIdx < nParticles; particleIdx++) VZero(particles[particleIdx].force);
+
+//     //ToDo: Make this more efficient
+//     VecR deltaR;
+//     real distance, forceMagnitude;
+//     for(int pIdx1 = 0; pIdx1 < nParticles; pIdx1++){
+//         for(int pIdx2 = pIdx1+1; pIdx2 < nParticles; pIdx2++){
+//                 VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
+//                 VWrapAllTang(deltaR); //Apply periodic boundary condition
+//                 distance = sqrt(VLenSq(deltaR));
+//                 if(distance < sigma){ //Do particles interact?
+//                     //Forces: 
+//                     forceMagnitude = HarmonicForce(distance);
+//                     VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
+//                     VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
+//                 }
+//                 if(distance < 1){ //Do particles touch?
+//                     //Persistence change (no refreshing)
+//                     if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
+//                         particles[pIdx1].color = 2;
+//                         particles[pIdx1].D = greenPlusD;
+//                         particles[pIdx1].decayTimer = tau;
+//                     }
+//                     else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
+//                         particles[pIdx2].color = 2;
+//                         particles[pIdx2].D = greenPlusD;
+//                         particles[pIdx2].decayTimer = tau;
+//                     }
+//                 }
+//         }
+//     }
+// }
+
+
 void ComputeInteractions(){
+    //Build Linked list
+    VecR cellWidth;
+    VecI cellIdx;
+    int linearCellIdx;
+    VDiv(cellWidth, region, cells);
+
+    //Write linked list
+    for(int n = nParticles; n < nParticles + VProd(cells); n++) cellList[n] = -1; //Reset list values
+    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+        VDiv(cellIdx,particles[particleIdx].r,cellWidth);
+        linearCellIdx = VLinear(cellIdx, cells) + nParticles;//Linearise matrix index to vector index
+        cellList[particleIdx] = cellList[linearCellIdx];
+        cellList[linearCellIdx] = particleIdx;
+        // Explaination: After this every cellIndex (cellList[nParticle:nParticle+nCells])
+        // links to the first particle in that cell, that then links to the next particle,
+        // until the particle chain finishes with -1
+    }
+
+
     //Delete old force values
     for(int particleIdx = 0; particleIdx < nParticles; particleIdx++) VZero(particles[particleIdx].force);
 
-    //ToDo: Make this more efficient
+    //Compute interactions:
     VecR deltaR;
     real distance, forceMagnitude;
-    for(int pIdx1 = 0; pIdx1 < nParticles; pIdx1++){
-        for(int pIdx2 = pIdx1+1; pIdx2 < nParticles; pIdx2++){
-                VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
-                VWrapAllTang(deltaR); //Apply periodic boundary condition
-                distance = sqrt(VLenSq(deltaR));
-                if(distance < sigma){ //WARNING: this needs to be changed if we don't measure in units of r0
-                    //Forces: 
-                    forceMagnitude = HarmonicForce(distance);
-                    VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
-                    VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
-                    
-                    //Persistence change (no refreshing)
-                    if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
-                        particles[pIdx1].color = 2;
-                        particles[pIdx1].D = greenPlusD;
-                        particles[pIdx1].decayTimer = tau;
+    VecI cellIdx1, cellIdx2;
+    int linearCellIdx1, linearCellIdx2;
+    VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
+    int nOffsets = 5;
+    //Go through all cells
+    for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
+        for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
+            VSet(cellIdx1,cellXIdx,cellYIdx);
+            //Go through this cell and its neighbouring cells
+            for(int offsetIdx = 0; offsetIdx < nOffsets; offsetIdx++){
+                VSAdd(cellIdx2, cellIdx1, 1, offset[offsetIdx]);
+                VCellWrapAll(cellIdx2); //Periodic boundaries for cells
+                linearCellIdx1 = VLinear(cellIdx1, cells) + nParticles;
+                linearCellIdx2 = VLinear(cellIdx2, cells) + nParticles;
+                //Go through all particles in the cells
+                for(int pIdx1 = cellList[linearCellIdx1]; pIdx1 >=0; pIdx1 = cellList[pIdx1]){
+                    for(int pIdx2 = cellList[linearCellIdx2]; pIdx2 >=0; pIdx2 = cellList[pIdx2]){
+                        if(linearCellIdx1!=linearCellIdx2 || pIdx2 < pIdx1){ //Avoid double counting in same cell
+                            VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
+                            VWrapAllTang(deltaR); //Apply periodic boundary condition
+                            distance = sqrt(VLenSq(deltaR));
+                            if(distance < sigma){ //Do particles interact?
+                                //Forces: 
+                                forceMagnitude = HarmonicForce(distance);
+                                VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
+                                VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
+                            }
+                            if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
+                                //Persistence change (no refreshing)
+                                if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
+                                    particles[pIdx1].color = 2;
+                                    particles[pIdx1].D = greenPlusD;
+                                    particles[pIdx1].decayTimer = tau;
+                                }
+                                else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
+                                    particles[pIdx2].color = 2;
+                                    particles[pIdx2].D = greenPlusD;
+                                    particles[pIdx2].decayTimer = tau;
+                                }
+                            }
+                        }
                     }
-                    else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
-                        particles[pIdx2].color = 2;
-                        particles[pIdx2].D = greenPlusD;
-                        particles[pIdx2].decayTimer = tau;
-                    }
-
-
                 }
+            }
         }
     }
 }
+
 void EulerMaruyamaR(){
     real rootStepDuration = sqrt(stepDuration); //ToDo: Avoid repeat calls
     real root2 = sqrt(2);
@@ -279,7 +362,7 @@ void SingleStep (int stepIdx){
     UpdatePersistence();
     int measurementSteps = measurementInterval/stepDuration; 
     if((stepIdx >0) && (stepIdx % measurementSteps == 0)){ //Initial measurement is done be SetUpJob()
-       MeasurePositions(stepIdx*stepDuration);
+        MeasurePositions(stepIdx*stepDuration);
     }
 }
 
@@ -312,6 +395,7 @@ void cleanup(){
 
     //Free memory
     free(particles);
+    free(cellList);
     free(measurementTimes);
     for(int idx = 0; idx < nMeasurements; idx++){
         free(positionMeasurements[idx]);
