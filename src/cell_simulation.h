@@ -5,8 +5,11 @@
 #include <time.h>
 #include <math.h>
 #include <assert.h>
+#include <gsl/gsl_multimin.h>
+#include <gsl/gsl_vector.h>
 #include "base_types2D.h"
 #include "xoshiro_rng.h"
+
 
 
 double getNextParameter(FILE * file, char * parameterName){
@@ -25,10 +28,9 @@ double getNextParameter(FILE * file, char * parameterName){
 
 void SetParameters(int argc, char ** argv){
     char * PATH = argv[1];
-    printf(PATH);
-    printf("\n");
-    //char * NAME = argv[2];
-
+    printf("Parameter file: "); printf(PATH); printf("\n");
+    printf("Initialise paramters:\n");
+    
     FILE * file;
     file = fopen(PATH,"r+");
     
@@ -52,16 +54,8 @@ void SetParameters(int argc, char ** argv){
     assert(measurementInterval/stepDuration==floor(measurementInterval/stepDuration));
     //The Simulation duration must be a multiple of measurementInterval
     assert(stepLimit*stepDuration/measurementInterval==floor(stepLimit*stepDuration/measurementInterval)); 
-    //The particle numbers must be square of an integer
-    assert(sqrt(nGreenParticles)==floor(sqrt(nGreenParticles)));
-    assert(sqrt(nRedParticles)==floor(sqrt(nRedParticles)));
-    //Particle numbers can't be zero
-    assert(nGreenParticles>0);
-    assert(nRedParticles >0);
 
     //Initialise secondary parameters
-    initialCellsGreen = (VecI) {.x = sqrt(nGreenParticles), .y = sqrt(nGreenParticles)}; 
-    initialCellsRed = (VecI) {.x = sqrt(nRedParticles), .y=sqrt(nRedParticles)};
     nParticles = nGreenParticles + nRedParticles;
     //Setup Square area to fit the area fraction; each particle covers area of size pi*0.5^2 = 0.785398
     real length = sqrt(nParticles*0.785398/areaFraction);
@@ -71,22 +65,18 @@ void SetParameters(int argc, char ** argv){
     cells.x = region.x/(sigma); //Smallest cells that are larger than interaction range
     cells.y = region.y/(sigma);
 
-
-
     nMeasurements = stepLimit*stepDuration/measurementInterval; 
-    seed = 1;//time(NULL);
+    seed = SEED;//time(NULL);
     rng = xoshiro256ss_init(seed);
     srand(seed);
-
-
 
     char  suffix[] = "_tracks.csv";
     tracksFile = fopen(strcat(PATH,suffix),"w");
 
     //append the file
-    //fprintf(file, "Secondary paramters:\n");
     fprintf(file, "nParticles : %i\n",nParticles);
-    fprintf(file, "Length : %f\n",length);
+    fprintf(file, "Length     : %f\n",length);
+    fprintf(file, "Seed       : %i \n",seed);
     fclose(file);
 }
 
@@ -105,32 +95,163 @@ void AllocArrays(){
     }   
 };
 
-void InitialisePositions(){
-    // ToDo: Make sure there is no overlap if nGreenParticles!=nRedParticles
-    // ToDo: Make sure it works for nRedParticles = 0
-    
-    int particleIdx = 0;
-    //Green particles 
-    VecR cellSizeGreen;
-    VDiv(cellSizeGreen, region, initialCellsGreen);
-    for(int xIdx = 0; xIdx < initialCellsGreen.x; xIdx++){
-        for(int yIdx = 0; yIdx < initialCellsGreen.y; yIdx++){
-            particles[particleIdx].r.x = cellSizeGreen.x * (xIdx+0.33); //Small offset for green
-            particles[particleIdx].r.y = cellSizeGreen.y * (yIdx+0.33);
-            particleIdx++;
+//Potential Energy to be minimised
+double fHarmonicPotential(const gsl_vector *v, void *params){
+    VecR * positions;
+    positions = (VecR *) malloc(nParticles*sizeof(VecR));
+    for(int particleIdx=0; particleIdx<nParticles; particleIdx++){
+        positions[particleIdx].x = gsl_vector_get(v, 2*particleIdx);
+        positions[particleIdx].y = gsl_vector_get(v, 2*particleIdx + 1);
+    }
+    double * para = (double *) params;
+    double sigma = para[0];
+
+    double V = 0;
+    VecR deltaR;
+    real distance;
+    for(int pIdx1 = 0; pIdx1 < nParticles; pIdx1++){
+        for(int pIdx2 = pIdx1+1; pIdx2 < nParticles; pIdx2++){
+            VSub(deltaR, positions[pIdx1],positions[pIdx2]);
+            VWrapAllTang(deltaR); //Periodic Boundary conditions
+            distance = sqrt(VLenSq(deltaR));
+            if(distance < sigma){
+                V += (distance-1)*(distance-1);
+            }
         }
     }
-    //Red particles 
-    VecR cellSizeRed;
-    VDiv(cellSizeRed, region, initialCellsRed);
-    for(int xIdx = 0; xIdx < initialCellsRed.x; xIdx++){
-        for(int yIdx = 0; yIdx < initialCellsRed.y; yIdx++){
-            particles[particleIdx].r.x = cellSizeRed.x * (xIdx+0.66); //Big offset for red
-            particles[particleIdx].r.y = cellSizeRed.y * (yIdx+0.66);
-            particleIdx++;
+    free(positions);
+    return V;
+}
+
+//Gradient of the potential (For gsl_multimin energy minimisation of initial positons)
+void dfHarmonicPotential(const gsl_vector *v, void *params, gsl_vector *df){
+    //ToDo: Take care of divergence at 0
+    VecR * positions, *gradient;
+    positions = (VecR *) malloc(nParticles*sizeof(VecR));
+    gradient = (VecR *) malloc(nParticles*sizeof(VecR));
+    for(int particleIdx=0; particleIdx<nParticles; particleIdx++){
+        positions[particleIdx].x = gsl_vector_get(v, 2*particleIdx);
+        positions[particleIdx].y = gsl_vector_get(v, 2*particleIdx + 1);
+    }
+    double * para = (double *) params;
+    double sigma = para[0]; //Interaction range
+    VecR deltaR;
+    real distance;
+    //Calculate gradient
+    for(int gradientIdx = 0; gradientIdx < nParticles; gradientIdx++){
+        VSet(gradient[gradientIdx],0,0);
+        for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+            if(particleIdx != gradientIdx){
+                VSub(deltaR, positions[gradientIdx],positions[particleIdx]);
+                VWrapAllTang(deltaR); //Periodic Boundary conditions
+                distance = sqrt(VLenSq(deltaR));
+                if(distance==0){ //Avoid undefined behaviour and just send the particle in some direction
+                    VecR direction = {.x = 1, .y = 1};
+                    VSAdd(gradient[gradientIdx], gradient[gradientIdx], -2, direction);
+                }
+                else if(distance < sigma){
+                    VSAdd(gradient[gradientIdx], gradient[gradientIdx], 2*(1-1/distance), deltaR);
+                }
+            }
         }
+    }
+    //Write gradient to gsl vector (For gsl_multimin energy minimisation of initial positons)
+    for(int gradientIdx = 0; gradientIdx < nParticles; gradientIdx++){
+        gsl_vector_set(df, 2*gradientIdx    , gradient[gradientIdx].x);
+        gsl_vector_set(df, 2*gradientIdx + 1, gradient[gradientIdx].y);
+    }
+    free(positions);
+    free(gradient);
+}
+
+//Potential and Gradient together (For gsl_multimin energy minimisation of initial positons)
+void fdfHarmonicPotential(const gsl_vector *x, void * params, double * f, gsl_vector *df){
+    *f = fHarmonicPotential(x, params);
+    dfHarmonicPotential(x, params, df);
+}
+
+void InitialisePositions(){    
+    //Assign random initial positions
+    double uniform1, uniform2;
+    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+        uniform1 = xoshire256ss_uniform(&rng);
+        uniform2 = xoshire256ss_uniform(&rng);
+        particles[particleIdx].r.x = region.x*uniform1;
+        particles[particleIdx].r.y = region.y*uniform2;
     }
 
+    //Minimise Energy of initial positions with GSL conjugate gradient
+
+    //Parameters
+    double stepSize = STEP_SIZE; //Initial step size
+    double lineTol = LINE_TOL; //Error tolerance for the line minimisation in a given direction
+    double tol = TOL; //Error tolerance for the overall minimisation
+    int maxIter = MAX_ITER;
+
+    //Initialise function to minimise
+    double params[1] = {sigma};
+    gsl_multimin_function_fdf func;
+    func.f      =   &fHarmonicPotential;
+    func.df     =  &dfHarmonicPotential;
+    func.fdf    = &fdfHarmonicPotential;
+    func.n      = 2*nParticles; //Number of variables
+    func.params = (void*) params;
+
+    //starting point
+    gsl_vector *x;
+    x = gsl_vector_alloc(2*nParticles);
+    
+    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+        gsl_vector_set(x,2*particleIdx,     particles[particleIdx].r.x);
+        gsl_vector_set(x,2*particleIdx + 1, particles[particleIdx].r.y);
+    }
+
+    //Initialise minimizer
+    const gsl_multimin_fdfminimizer_type *T;
+    gsl_multimin_fdfminimizer *s;
+    T = gsl_multimin_fdfminimizer_conjugate_fr; //Fletcher-Reeves conjugate gradient algorithm
+    s = gsl_multimin_fdfminimizer_alloc (T, 2*nParticles); 
+    gsl_multimin_fdfminimizer_set (s, &func, x, stepSize, lineTol);
+
+    printf("Initial Potential Energy: %f \n",s->f);
+
+    //Minimise potential energy of particle configuration
+    size_t iter = 0;
+    int status;
+    do{
+    iter++;
+    status = gsl_multimin_fdfminimizer_iterate (s);
+    
+    if (status)
+        break;
+
+    status = gsl_multimin_test_gradient (s->gradient, tol);
+
+    // if (status == GSL_SUCCESS)
+    //     printf ("Minimum found at:\n");
+
+    // printf ("%5d (%.3f %.3f) (%.3f %.3f) %10.5f\n", iter,
+    //         gsl_vector_get (s->x, 0),
+    //         gsl_vector_get (s->x, 1),
+    //         gsl_vector_get (s->x, 2),
+    //         gsl_vector_get (s->x, 3),
+    //         s->f);
+
+    } while (status == GSL_CONTINUE && iter < maxIter);
+
+    printf("Potential energy after %i/%i iterations: %f \n", iter, maxIter, s->f);
+
+    //Copy new starting positions
+    VecR pos;
+    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+        pos.x = gsl_vector_get(s->x,2*particleIdx); 
+        pos.y = gsl_vector_get(s->x,2*particleIdx+1); 
+        VWrapAll(pos); //Enforce periodic boundary conditions
+        particles[particleIdx].r = pos;
+    }
+
+    gsl_multimin_fdfminimizer_free (s);
+    gsl_vector_free (x);
 };
 
 void InitialiseColor(){
@@ -188,41 +309,6 @@ void SetUpJob(){
 real HarmonicForce(real distance){
     return -k/distance*(distance-1); //WARNING: this needs to be changed if we don't measure in units of sigma
 }
-// void ComputeInteractions(){
-//     //Delete old force values
-//     for(int particleIdx = 0; particleIdx < nParticles; particleIdx++) VZero(particles[particleIdx].force);
-
-//     //ToDo: Make this more efficient
-//     VecR deltaR;
-//     real distance, forceMagnitude;
-//     for(int pIdx1 = 0; pIdx1 < nParticles; pIdx1++){
-//         for(int pIdx2 = pIdx1+1; pIdx2 < nParticles; pIdx2++){
-//                 VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
-//                 VWrapAllTang(deltaR); //Apply periodic boundary condition
-//                 distance = sqrt(VLenSq(deltaR));
-//                 if(distance < sigma){ //Do particles interact?
-//                     //Forces: 
-//                     forceMagnitude = HarmonicForce(distance);
-//                     VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
-//                     VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
-//                 }
-//                 if(distance < 1){ //Do particles touch?
-//                     //Persistence change (no refreshing)
-//                     if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
-//                         particles[pIdx1].color = 2;
-//                         particles[pIdx1].D = greenPlusD;
-//                         particles[pIdx1].decayTimer = tau;
-//                     }
-//                     else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
-//                         particles[pIdx2].color = 2;
-//                         particles[pIdx2].D = greenPlusD;
-//                         particles[pIdx2].decayTimer = tau;
-//                     }
-//                 }
-//         }
-//     }
-// }
-
 
 void ComputeInteractions(){
     //Build Linked list

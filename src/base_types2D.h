@@ -71,15 +71,15 @@ typedef struct {
 //Wraps tangent vectors, i.e. those that leave the top right quadrant
 //assumes (rectangular) boundary is given as VecR region
 #define VWrapTang(v, t) \
-    if (v.t >= 0.5 * region.t) v.t -= region.t; \
-    else if (v.t < -0.5 * region.t) v.t += region.t 
+    while (v.t >= 0.5 * region.t) v.t -= region.t; \
+    while (v.t < -0.5 * region.t) v.t += region.t;
 #define VWrapAllTang(v) \
     {VWrapTang (v, x); \
     VWrapTang (v, y);}
 //Wraps position vectors, that only live in the top right quadrant
 #define VWrap(v,t)\
-    if (v.t >= region.t) v.t -= region.t; \
-    else if (v.t < 0) v.t += region.t;
+    while(v.t >= region.t) v.t -= region.t; \
+    while(v.t < 0) v.t += region.t;
 #define VWrapAll(v) \
     {VWrap(v,x); \
      VWrap(v,y);}

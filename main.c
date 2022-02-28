@@ -70,10 +70,10 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
 */ 
     clock_t t;
     t = clock();
-    printf("Begin Simulation... \n");
-
+    
     SetParameters(argc, argv);
     SetUpJob();
+    printf("Begin Simulation... \n");
     for(int stepIdx = 0; stepIdx < stepLimit; stepIdx++){
         SingleStep(stepIdx);
     }

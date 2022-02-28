@@ -1,9 +1,9 @@
-stepLimit               : 10000
-nGreenParticles         : 9
-nRedParticles           : 9
+stepLimit               : 1000
+nGreenParticles         : 100
+nRedParticles           : 100
 stepDuration            : 0.001
-measurementInterval     : 0.01
-areaFraction            : 0.02
+measurementInterval     : 0.1
+areaFraction            : 0.9
 redD                    : 1
 greenD                  : 1
 greenPlusD              : 0.01
@@ -11,5 +11,7 @@ k                       : 5
 tau                     : 2
 Pe                      : 10
 sigma                   : 1.4
-nParticles : 18
-Length : 26.586805
+nParticles : 200
+Length     : 13.211090
+Seed       : 1 
+6069805 
