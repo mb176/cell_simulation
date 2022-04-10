@@ -1,0 +1,2 @@
+/usr/bin/ar qc libxoshiro_rng.a CMakeFiles/xoshiro_rng.dir/xoshiro_rng.c.o
+/usr/bin/ranlib libxoshiro_rng.a

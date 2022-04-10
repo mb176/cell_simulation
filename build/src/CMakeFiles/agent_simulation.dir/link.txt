@@ -1,0 +1,1 @@
+/usr/bin/gcc -g CMakeFiles/agent_simulation.dir/main.c.o -o agent_simulation  libcell_simulation_library.a libxoshiro_rng.a -lm -lgsl -lgslcblas 

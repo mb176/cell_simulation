@@ -1,15 +1,21 @@
 #!/bin/bash
-#parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/HigherDensity/HigherDensity"
-parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/test_parameters"
-gcc -lgsl -lgslcblas -lm main.c -o main  
-#-lm to link math library
-#-lgsl -lgslcblas to use GSL library
-./main $parameterFile 
+
+# parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/HighDensity1/HighDensity1"
+# parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/HighDensityControl1/HighDensityControl1"
+# parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/LowDensity1/LowDensity1"
+# parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/LowDensityControl1/LowDensityControl1"
+parameterFile="/home/marius/PhD/CellMotility/agent_simulation/validation/MIPS/ABP_MIPS_3"
+# echo "Start compilation..."
+# gcc -ffast-math -lgsl -lgslcblas -lm main.c -o main   #2>>"${parameterFile}"
+# #-ffast-math for faster flops
+# #-lgsl -lgslcblas to use GSL library
+# #-lm to link math library
+# ./main $parameterFile 
 
 #Analysis
 cd ../analysis
 echo "Animating trajectory..."
-python3 track_animation.py $parameterFile
-echo "Analysing the tracks..."
-python3 agent_simulation_analysis.py $parameterFile
+python3 RDF_simulation.py $parameterFile
+# echo "Analysing the tracks..."
+# python3 MSD.py $parameterFile
 echo "Done."

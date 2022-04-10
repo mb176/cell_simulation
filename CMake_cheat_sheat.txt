@@ -1,0 +1,14 @@
+VSCode: -just click on the blue bar at the bottom, select the compiler and then                                        
+        you can build/run/debug by clicking
+        -Hotkeys (in main.c): Build: F7, Run: SHIFT+F5, Debug: CTRL+F5 
+        -Debugging: With C/C++ extension, just set arguments etc in .vscode/launch.json -> can set argument
+        -this is different from the cmake tools debugger (bottom bar/ hotkey) which is not following the launch.json rules
+        
+        
+Terminal: -for configuration and build system (once in the beginning): go to 
+            /agent_simulation/build and type "cmake .." (your location is where it builds, the argument is where the file is
+          -for building: "cmake --build build [--config [Debug/Release]]"
+          -for testing: go into build and run "ctest"
+          -Debugguing: Use "gdb agent_simulation" to start dgb debugging (I  
+           think agent_simulation needs to be compiled with debugging option)
+

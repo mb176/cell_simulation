@@ -1,0 +1,22 @@
+[
+{
+  "directory": "/home/marius/PhD/CellMotility/agent_simulation/build/src",
+  "command": "/usr/bin/gcc   -g -o CMakeFiles/cell_simulation_library.dir/cell_simulation.c.o -c /home/marius/PhD/CellMotility/agent_simulation/src/cell_simulation.c",
+  "file": "/home/marius/PhD/CellMotility/agent_simulation/src/cell_simulation.c"
+},
+{
+  "directory": "/home/marius/PhD/CellMotility/agent_simulation/build/src",
+  "command": "/usr/bin/gcc   -g -o CMakeFiles/xoshiro_rng.dir/xoshiro_rng.c.o -c /home/marius/PhD/CellMotility/agent_simulation/src/xoshiro_rng.c",
+  "file": "/home/marius/PhD/CellMotility/agent_simulation/src/xoshiro_rng.c"
+},
+{
+  "directory": "/home/marius/PhD/CellMotility/agent_simulation/build/src",
+  "command": "/usr/bin/gcc   -g -o CMakeFiles/agent_simulation.dir/main.c.o -c /home/marius/PhD/CellMotility/agent_simulation/src/main.c",
+  "file": "/home/marius/PhD/CellMotility/agent_simulation/src/main.c"
+},
+{
+  "directory": "/home/marius/PhD/CellMotility/agent_simulation/build/test",
+  "command": "/usr/bin/g++    -std=gnu++11 -g -o CMakeFiles/run_unit_tests.dir/unit_tests.cc.o -c /home/marius/PhD/CellMotility/agent_simulation/test/unit_tests.cc",
+  "file": "/home/marius/PhD/CellMotility/agent_simulation/test/unit_tests.cc"
+}
+]

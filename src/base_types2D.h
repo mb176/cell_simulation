@@ -17,7 +17,7 @@ typedef struct {
 //active brownian motion particle
 typedef struct {
     VecR r; // position of particle
-    real theta; // unit vector showing velocity direction
+    real theta; // angle of velocity direction
     VecR force; //force displacing the particle this step
     real D; // Rotational diffusion constant
     real decayTimer; //Time it takes to go back to less persistent state

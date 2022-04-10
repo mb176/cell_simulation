@@ -1,0 +1,5 @@
+if(EXISTS "/home/marius/PhD/CellMotility/agent_simulation/build/test/run_unit_tests[1]_tests.cmake")
+  include("/home/marius/PhD/CellMotility/agent_simulation/build/test/run_unit_tests[1]_tests.cmake")
+else()
+  add_test(run_unit_tests_NOT_BUILT run_unit_tests_NOT_BUILT)
+endif()

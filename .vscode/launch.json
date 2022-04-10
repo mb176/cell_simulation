@@ -9,24 +9,30 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "C/C++ Runner: Debug Session",
+      "name": "(gdb) Launch",
       "type": "cppdbg",
       "request": "launch",
-      "args": [],
+      "program": "${workspaceFolder}/build/src/agent_simulation",
+      "args": ["/home/marius/PhD/CellMotility/agent_simulation/output/test/test_parameters"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "CMake tools (gdb) Launch",
+      "type": "cppdbg",
+      "request": "launch",
+      // Resolved by CMake Tools:
+      "program": "${workspaceFolder}/build/src/agent_simulation",
+      "args": ["/home/marius/PhD/CellMotility/agent_simulation/output/test/test_parameters"],
       "stopAtEntry": false,
-      "cwd": "/home/marius/PhD/CellMotility/agent_simulation/data_analysis",
-      "environment": [],
-      "program": "/home/marius/PhD/CellMotility/agent_simulation/data_analysis/build/Debug/outDebug",
-      "internalConsoleOptions": "openOnSessionStart",
+      "cwd": "${workspaceFolder}",
+      "externalConsole": true,
       "MIMode": "gdb",
-      "miDebuggerPath": "gdb",
-      "externalConsole": false,
       "setupCommands": [
-        {
-          "description": "Enable pretty-printing for gdb",
-          "text": "-enable-pretty-printing",
-          "ignoreFailures": true
-        }
+          {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+          }
       ]
     }
   ]

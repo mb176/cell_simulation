@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcell_simulation_library.a CMakeFiles/cell_simulation_library.dir/cell_simulation.c.o
+/usr/bin/ranlib libcell_simulation_library.a

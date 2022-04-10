@@ -1,17 +1,25 @@
 stepLimit               : 1000
 nGreenParticles         : 100
 nRedParticles           : 100
-stepDuration            : 0.001
-measurementInterval     : 0.1
-areaFraction            : 0.9
-redD                    : 1
-greenD                  : 1
+stepDuration            : 1e-5
+measurementInterval     : 1e-4
+areaFraction            : 0.2
+redD                    : 2
+greenD                  : 2
 greenPlusD              : 0.01
-k                       : 5
+k                       : 100
 tau                     : 2
-Pe                      : 10
-sigma                   : 1.4
-nParticles : 200
-Length     : 13.211090
-Seed       : 1 
-6069805 
+Pe                      : 20
+sigma                   : 1.0
+LennardJones            : 0
+nParticles              : 200
+Length                  : 28.024953
+Seed                    : 1 
+
+LOGFILE: Sun Apr 10 22:21:29 2022
+Initial Potential Energy: 8.046082 
+Potential energy after 16/100 iterations: 0.000000 
+Begin Simulation... 
+||||||||||||||||||||
+Simulation ended after 0.221027 seconds 
+
