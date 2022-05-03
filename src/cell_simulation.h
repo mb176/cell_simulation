@@ -46,6 +46,8 @@ real HarmonicForce(real distance);
 
 real LennardJonesForce(real distance);
 
+real GetAngle(VecR r);
+
 void ComputeInteractions();
 
 void EulerMaruyamaR();

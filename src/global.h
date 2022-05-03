@@ -22,6 +22,7 @@ extern int nMeasurements;
 extern VecI initialCellsGreen; //2D vector containing the number of particles in the x and y direction
 extern VecI initialCellsRed;
 extern int LennardJones; //bool that says whether if we use Lennard Jones potential instead of harmonic interactions 
+extern int skippedSteps; //only after these steps will tracks be recorded (saves space)
 
 // Data structures
 extern uint64_t seed;

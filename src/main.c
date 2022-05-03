@@ -9,6 +9,7 @@
 // #include "src/xoshiro_rng.h"
 
 
+
 /*
 In general
 - parallelise with openMP
@@ -47,6 +48,7 @@ int nMeasurements;
 VecI initialCellsGreen; //2D vector containing the number of particles in the x and y direction
 VecI initialCellsRed;
 int LennardJones; //bool that says whether if we use Lennard Jones potential instead of harmonic interactions 
+int skippedSteps; //only after these steps will tracks be recorded (saves space)
 // Data structures
 uint64_t seed;
 struct xoshiro256ss_state rng;
@@ -77,17 +79,25 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     SetUpJob();
     printf("Begin Simulation... \n");
     fprintf(paramFile,"Begin Simulation... \n");
+    #ifdef DEBUG
+    printf("DEBUG MODE\n");
+    #endif
+    
     for(int stepIdx = 0; stepIdx < stepLimit; stepIdx++){
+        //Iterate simulation, save positions at certain step indices
         SingleStep(stepIdx);
-        if(stepIdx % (stepLimit/20)==0){ //Progressbar, one line every 5%
+
+        //Progressbar, one line every 5%
+        if(stepIdx % (stepLimit/20)==0){ 
             printf("|");
             fflush(stdout); //Flushes stdout
             fprintf(paramFile,"|");
             fflush(paramFile); //Flushes the buffer
         }
     }
-    writeTracks();
+    writeTracks(); //Save positions to disk
 
+    //Simulation duration
     t = clock() - t;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("\nSimulation ended after %f seconds \n",time_taken);

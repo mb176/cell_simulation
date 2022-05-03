@@ -51,12 +51,15 @@ void SetParameters(char** argv){
     Pe = getNextParameter(paramFile, "Pe");
     sigma = getNextParameter(paramFile, "sigma");
     LennardJones = getNextParameter(paramFile, "LennardJones");
+    skippedSteps = getNextParameter(paramFile, "skippedSteps"); 
 
     // Barricades
     //measurementInterval must be a multiple of stepDuration
-    assert(measurementInterval/stepDuration==floor(measurementInterval/stepDuration));
+    assert((measurementInterval/stepDuration)==floor(measurementInterval/stepDuration));
+    //Can't skip more steps than we have
+    assert(stepLimit>skippedSteps);
     //The Simulation duration must be a multiple of measurementInterval
-    assert(stepLimit*(stepDuration/measurementInterval)==floor(stepLimit*(stepDuration/measurementInterval))); 
+    assert((stepLimit-skippedSteps)*(stepDuration/measurementInterval)==floor((stepLimit-skippedSteps)*(stepDuration/measurementInterval))); 
     //Need it least 20 steps, otherwise the loading bar divides by zero
     assert(stepLimit>=20);
 
@@ -70,7 +73,7 @@ void SetParameters(char** argv){
     cells.x = region.x/(sigma); //Smallest cells that are larger than interaction range
     cells.y = region.y/(sigma);
 
-    nMeasurements = stepLimit*(stepDuration/measurementInterval); 
+    nMeasurements = (stepLimit-skippedSteps)*(stepDuration/measurementInterval) + 1; //+1 one because we do the first and the last step 
     seed = SEED;//time(NULL);
     rng = xoshiro256ss_init(seed);
     srand(seed);
@@ -330,6 +333,16 @@ real LennardJonesForce(real distance){
     return 48*k*invDistance6*(invDistance6-0.5)*invDistance*invDistance;
 }
 
+real GetAngle(VecR r){
+    double theta;
+    if(r.x>=0){
+        theta = atan(r.y/r.x);
+    } else {
+        theta = atan(r.y/r.x)+M_PI ;
+    }
+    return theta;
+}
+
 void ComputeInteractions(){
     //Build Linked list
     VecR cellWidth;
@@ -394,12 +407,35 @@ void ComputeInteractions(){
                                     particles[pIdx1].color = 2;
                                     particles[pIdx1].D = greenPlusD;
                                     particles[pIdx1].decayTimer = tau;
+                                    //Contact inhibited locomotion: Cells move away after contact
+                                    real theta = GetAngle(deltaR);
+                                    particles[pIdx1].theta = theta;
+                                    particles[pIdx2].theta = theta + M_PI;
+
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
                                     particles[pIdx2].D = greenPlusD;
                                     particles[pIdx2].decayTimer = tau;
+                                    //Contact inhibited locomotion: Cells move away after contact
+                                    real theta = GetAngle(deltaR);
+                                    particles[pIdx1].theta = theta;
+                                    particles[pIdx2].theta = theta + M_PI;
+                                    
+                                } else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
+                                    //Contact inhibited locomotion: Cells move away after contact
+                                    real theta = GetAngle(deltaR);
+                                    particles[pIdx1].theta = theta;
+                                    particles[pIdx2].theta = theta + M_PI;
+                                    
+                                } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
+                                    //Contact inhibited locomotion: Cells move away after contact
+                                    real theta = GetAngle(deltaR);
+                                    particles[pIdx1].theta = theta;
+                                    particles[pIdx2].theta = theta + M_PI;
+                                    
                                 }
+
                             }
                         }
                     }
@@ -428,6 +464,18 @@ void EulerMaruyamaR(){
         xoshiro256ss_normal(noise, &rng);
         particles[particleIdx].r.x += rootStepDuration*root2*noise[0];
         particles[particleIdx].r.y += rootStepDuration*root2*noise[1];
+
+        #ifdef DEBUG
+        double distanceSq = VLenSq(velocity)*stepDuration*stepDuration*Pe*Pe;
+        distanceSq += VLenSq(particles[particleIdx].force)*stepDuration*stepDuration;
+        distanceSq += 2*stepDuration*(noise[0]*noise[0]+noise[1]*noise[1]);
+        if(distanceSq>MAX_STEP_DISPLACEMENT*MAX_STEP_DISPLACEMENT){
+            double max = MAX_STEP_DISPLACEMENT;
+            printf("Error: The displacment of %f was larger the the allowed maximum of %f\n",sqrt(distanceSq),max);
+            fflush(stdout);
+            assert(0);  //Exceeds maximum displacement
+        }
+        #endif
     }   
 }
 
@@ -446,7 +494,12 @@ void EulerMaruyamaTheta(){
 }
 
 void EnforcePeriodicBoundaries(){
+    double xMax = 2*region.x;
+    double yMax = 2*region.y;
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
+        //Check for large jumps
+        assert(abs(particles[particleIdx].r.x)<xMax); //Step is larger than the entire box, reduce stepDuration!
+        assert(abs(particles[particleIdx].r.y)<yMax);
         //Position
         VWrapAll(particles[particleIdx].r);
     }
@@ -473,7 +526,9 @@ void SingleStep (int stepIdx){
     EnforcePeriodicBoundaries();
     UpdatePersistence();
     int measurementSteps = measurementInterval/stepDuration; 
-    if((stepIdx >0) && (stepIdx % measurementSteps == 0)){ //Initial measurement is done be SetUpJob()
+    if(((stepIdx > skippedSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
+        MeasurePositions(stepIdx*stepDuration);
+    } else if (stepIdx==(stepLimit-1)){ //Save final step (initial position is measured by SetUpJob()
         MeasurePositions(stepIdx*stepDuration);
     }
 }

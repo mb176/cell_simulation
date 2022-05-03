@@ -8,3 +8,6 @@
 #define MAX_ITER 100; //Maximum number of iterations for the GSL minimiser
 
 
+//Enable DEBUG for more output/ extra assert cases
+//#define DEBUG
+#define MAX_STEP_DISPLACEMENT 1.0 //In debug mode we assert that a particle cannot travel further than that in a single step 
