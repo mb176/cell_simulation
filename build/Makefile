@@ -155,19 +155,6 @@ agent_simulation/fast:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/agent_simulation.dir/build.make src/CMakeFiles/agent_simulation.dir/build
 .PHONY : agent_simulation/fast
 
-#=============================================================================
-# Target rules for targets named run_unit_tests
-
-# Build rule for target.
-run_unit_tests: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 run_unit_tests
-.PHONY : run_unit_tests
-
-# fast build rule for target.
-run_unit_tests/fast:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/run_unit_tests.dir/build.make test/CMakeFiles/run_unit_tests.dir/build
-.PHONY : run_unit_tests/fast
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -178,7 +165,6 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... agent_simulation"
 	@echo "... cell_simulation_library"
-	@echo "... run_unit_tests"
 	@echo "... xoshiro_rng"
 .PHONY : help
 

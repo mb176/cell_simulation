@@ -45,7 +45,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/marius/PhD/CellMotility/agent_simulation/build/src/cmake_install.cmake")
-  include("/home/marius/PhD/CellMotility/agent_simulation/build/test/cmake_install.cmake")
 
 endif()
 

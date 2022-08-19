@@ -8,8 +8,7 @@
 					"build" : ".",
 					"childIndexes" : 
 					[
-						1,
-						2
+						1
 					],
 					"jsonFile" : "directory-.-Debug-f5ebdc15457944623624.json",
 					"minimumCMakeVersion" : 
@@ -33,21 +32,6 @@
 					[
 						0,
 						1,
-						3
-					]
-				},
-				{
-					"build" : "test",
-					"jsonFile" : "directory-test-Debug-451c0598f41488bb20b9.json",
-					"minimumCMakeVersion" : 
-					{
-						"string" : "3.10"
-					},
-					"parentIndex" : 0,
-					"projectIndex" : 0,
-					"source" : "test",
-					"targetIndexes" : 
-					[
 						2
 					]
 				}
@@ -59,16 +43,14 @@
 					"directoryIndexes" : 
 					[
 						0,
-						1,
-						2
+						1
 					],
 					"name" : "agent_simulation",
 					"targetIndexes" : 
 					[
 						0,
 						1,
-						2,
-						3
+						2
 					]
 				}
 			],
@@ -86,13 +68,6 @@
 					"id" : "cell_simulation_library::@145eef247bfb46b6828c",
 					"jsonFile" : "target-cell_simulation_library-Debug-a5f119c3df688b62b2e2.json",
 					"name" : "cell_simulation_library",
-					"projectIndex" : 0
-				},
-				{
-					"directoryIndex" : 2,
-					"id" : "run_unit_tests::@36f028580bb02cc8272a",
-					"jsonFile" : "target-run_unit_tests-Debug-93f9fe161247de01bd0f.json",
-					"name" : "run_unit_tests",
 					"projectIndex" : 0
 				},
 				{

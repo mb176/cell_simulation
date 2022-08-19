@@ -1,11 +1,11 @@
-#include <gtest/gtest.h>
+//#include <gtest/gtest.h>
 #include "../src/cell_simulation.h"
 #include "../src/global.h"
 #include "../src/base_types2D.h"
 
-TEST(HelloTest, SameStrings){
-  EXPECT_EQ("hello","hello");
-}
+// TEST(HelloTest, SameStrings){
+//   EXPECT_EQ("hello","hello");
+// }
 // // Demonstrate some basic assertions.
 // TEST(HelloTest, BasicAssertions) {
 //   // Expect two strings not to be equal.

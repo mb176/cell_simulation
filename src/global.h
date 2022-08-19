@@ -5,6 +5,7 @@
 #define MAX_STRING_LENGTH 50
 #include "base_types2D.h"
 
+
 //Simulation Parameters
 extern int stepLimit;
 extern int nParticles;

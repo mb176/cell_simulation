@@ -1,8 +1,13 @@
 #!/bin/bash
 #parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/HigherDensity/HigherDensity"
-parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/movies/areaFraction_0.7_Pe_80"
+if [ $# == 1 ]; then
+    parameterFile="$1"
+else 
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/test_parameters"
+fi
 
-# gcc -lgsl -lgslcblas -lm main.c -o main   #2>>"${parameterFile}"
+
+# gcc -lgsl -lgslcblas -lm main.c -o main #2>>"${parameterFile}"
 #-ffast-math for faster flops
 #-lgsl -lgslcblas to use GSL library
 #-lm to link math library
@@ -18,7 +23,6 @@ cmake --build build --config Debug
 ./build/src/agent_simulation $parameterFile #2>>"${parameterFile}"
 
 #Analysis
-cd ../analysis
 echo "Plotting the tracks..."
-# python3 final_snapshot_simulation.py $parameterFile
-python3 animation_simulation.py $parameterFile
+# python3 ../analysis/final_snapshot_simulation.py $parameterFile
+# python3 ../analysis/animation_simulation.py $parameterFile

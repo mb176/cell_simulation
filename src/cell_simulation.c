@@ -13,6 +13,14 @@
 #include "agent_simulation_config.h"
 
 
+//Gunnar's malloc macro, gives error if space can't be assigned (e.g. too big -> NULL returned from OS) and keeps taps on the ammount of space used 
+long long int total_malloced=0LL;
+#define MALLOC(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a)));} }
+//The verbose version prints the space used
+#define MALLOC_VERBOSE(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a))); printf("# Info: %lli bytes malloced for %s, %lli in total so far.\n", (long long int)((n)*sizeof(*a)), #a, total_malloced); } }
+
+
+
 
 double getNextParameter(FILE * file, char * parameterName){
     char line[MAX_LINE_LENGTH] = {0};
@@ -95,17 +103,17 @@ void SetParameters(char** argv){
 
 void AllocArrays(){
     //Particle array
-    particles = (particle *) malloc(nParticles*(sizeof(particle)));
-    //Linked list for cells
-    cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
+    MALLOC(particles, nParticles); //particles = (particle *) malloc(nParticles*(sizeof(particle)));
     //Measurement arrays
-    measurementTimes = (real *) malloc(nMeasurements*sizeof(real));
-    positionMeasurements = (VecR **) malloc(nMeasurements*sizeof(VecR *));
-    colorMeasurements = (int **) malloc(nMeasurements*sizeof(int*));
+    MALLOC(measurementTimes, nMeasurements); //measurementTimes = (real *) malloc(nMeasurements*sizeof(real));
+    MALLOC(positionMeasurements, nMeasurements); //positionMeasurements = (VecR **) malloc(nMeasurements*sizeof(VecR *));
+    MALLOC(colorMeasurements, nMeasurements); //colorMeasurements = (int **) malloc(nMeasurements*sizeof(int*));
     for(int idx = 0; idx < nMeasurements; idx++){
-        positionMeasurements[idx] = (VecR *) malloc(nParticles*sizeof(particle));
-        colorMeasurements[idx] = (int *) malloc(nParticles*sizeof(particle));
+        MALLOC(positionMeasurements[idx], nParticles); //positionMeasurements[idx] = (VecR *) malloc(nParticles*sizeof(particle));
+        MALLOC(colorMeasurements[idx], nParticles); //colorMeasurements[idx] = (int *) malloc(nParticles*sizeof(particle));
     }   
+    //Linked list for cells
+    MALLOC_VERBOSE(cellList, (nParticles + VProd(cells)));//cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
 };
 
 //Potential Energy to be minimised

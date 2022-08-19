@@ -64,17 +64,14 @@ CMAKE_BINARY_DIR = /home/marius/PhD/CellMotility/agent_simulation/build
 
 # The main recursive "all" target.
 all: src/all
-all: test/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
 preinstall: src/preinstall
-preinstall: test/preinstall
 .PHONY : preinstall
 
 # The main recursive "clean" target.
 clean: src/clean
-clean: test/clean
 .PHONY : clean
 
 #=============================================================================
@@ -95,21 +92,6 @@ src/clean: src/CMakeFiles/cell_simulation_library.dir/clean
 src/clean: src/CMakeFiles/xoshiro_rng.dir/clean
 src/clean: src/CMakeFiles/agent_simulation.dir/clean
 .PHONY : src/clean
-
-#=============================================================================
-# Directory level rules for directory test
-
-# Recursive "all" directory target.
-test/all: test/CMakeFiles/run_unit_tests.dir/all
-.PHONY : test/all
-
-# Recursive "preinstall" directory target.
-test/preinstall:
-.PHONY : test/preinstall
-
-# Recursive "clean" directory target.
-test/clean: test/CMakeFiles/run_unit_tests.dir/clean
-.PHONY : test/clean
 
 #=============================================================================
 # Target rules for target src/CMakeFiles/cell_simulation_library.dir
@@ -144,7 +126,7 @@ src/CMakeFiles/cell_simulation_library.dir/clean:
 src/CMakeFiles/xoshiro_rng.dir/all:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/xoshiro_rng.dir/build.make src/CMakeFiles/xoshiro_rng.dir/depend
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/xoshiro_rng.dir/build.make src/CMakeFiles/xoshiro_rng.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/marius/PhD/CellMotility/agent_simulation/build/CMakeFiles --progress-num=7,8 "Built target xoshiro_rng"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/marius/PhD/CellMotility/agent_simulation/build/CMakeFiles --progress-num=5,6 "Built target xoshiro_rng"
 .PHONY : src/CMakeFiles/xoshiro_rng.dir/all
 
 # Build rule for subdir invocation for target.
@@ -189,32 +171,6 @@ agent_simulation: src/CMakeFiles/agent_simulation.dir/rule
 src/CMakeFiles/agent_simulation.dir/clean:
 	$(MAKE) $(MAKESILENT) -f src/CMakeFiles/agent_simulation.dir/build.make src/CMakeFiles/agent_simulation.dir/clean
 .PHONY : src/CMakeFiles/agent_simulation.dir/clean
-
-#=============================================================================
-# Target rules for target test/CMakeFiles/run_unit_tests.dir
-
-# All Build rule for target.
-test/CMakeFiles/run_unit_tests.dir/all: src/CMakeFiles/cell_simulation_library.dir/all
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/run_unit_tests.dir/build.make test/CMakeFiles/run_unit_tests.dir/depend
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/run_unit_tests.dir/build.make test/CMakeFiles/run_unit_tests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/marius/PhD/CellMotility/agent_simulation/build/CMakeFiles --progress-num=5,6 "Built target run_unit_tests"
-.PHONY : test/CMakeFiles/run_unit_tests.dir/all
-
-# Build rule for subdir invocation for target.
-test/CMakeFiles/run_unit_tests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/marius/PhD/CellMotility/agent_simulation/build/CMakeFiles 4
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 test/CMakeFiles/run_unit_tests.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/marius/PhD/CellMotility/agent_simulation/build/CMakeFiles 0
-.PHONY : test/CMakeFiles/run_unit_tests.dir/rule
-
-# Convenience name for target.
-run_unit_tests: test/CMakeFiles/run_unit_tests.dir/rule
-.PHONY : run_unit_tests
-
-# clean rule for target.
-test/CMakeFiles/run_unit_tests.dir/clean:
-	$(MAKE) $(MAKESILENT) -f test/CMakeFiles/run_unit_tests.dir/build.make test/CMakeFiles/run_unit_tests.dir/clean
-.PHONY : test/CMakeFiles/run_unit_tests.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

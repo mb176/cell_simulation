@@ -5,6 +5,3 @@
 /home/marius/PhD/CellMotility/agent_simulation/build/src/CMakeFiles/agent_simulation.dir
 /home/marius/PhD/CellMotility/agent_simulation/build/src/CMakeFiles/edit_cache.dir
 /home/marius/PhD/CellMotility/agent_simulation/build/src/CMakeFiles/rebuild_cache.dir
-/home/marius/PhD/CellMotility/agent_simulation/build/test/CMakeFiles/run_unit_tests.dir
-/home/marius/PhD/CellMotility/agent_simulation/build/test/CMakeFiles/edit_cache.dir
-/home/marius/PhD/CellMotility/agent_simulation/build/test/CMakeFiles/rebuild_cache.dir
