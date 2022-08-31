@@ -52,7 +52,7 @@ echo $filepath
 # echo "LennardJones            : $LennardJones" >> "$filepath" 
 
 # #Start simulation
-# ./build/src/agent_simulation $filepath 
+./build/src/agent_simulation $filepath 
 
 #Calculate mixing index
 python3 ../analysis/calculate_mixing_index_simulation.py $filepath

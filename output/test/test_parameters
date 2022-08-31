@@ -17,10 +17,10 @@ nParticles              : 200
 Length                  : 17.724537
 Seed                    : 1 
 
-LOGFILE: Tue May 31 12:01:22 2022
+LOGFILE: Wed Aug 31 11:29:07 2022
 Initial Potential Energy: 26.642358 
 Potential energy after 99/8000 iterations: 0.000000 
 Begin Simulation... 
 ||||||||||||||||||||
-Simulation ended after 5.607280 seconds 
+Simulation ended after 5.562181 seconds 
 

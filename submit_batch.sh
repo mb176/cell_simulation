@@ -14,12 +14,12 @@ greenPlusD=0.3
 k=100 #Set as 5xPe 
 tau=0.25
 declare -a PeList
-PeList=(80 120)
+PeList=(80)
 sigma=1.0
 LennardJones=1
 skippedSteps=0
 
-TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/output/variedPersistence"
+TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/output/test"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -34,23 +34,23 @@ for areaFraction in "${areaFractionList[@]}"
 do
 filepath="${TARGET_FOLDER}/areaFraction_${areaFraction}_Pe_${Pe}"
 
-# # Write parameter file
-# echo $filepath
-# echo "stepLimit               : $stepLimit" > "$filepath" 
-# echo "nGreenParticles         : $nGreenParticles" >> "$filepath" 
-# echo "nRedParticles           : $nRedParticles" >> "$filepath" 
-# echo "stepDuration            : $stepDuration" >> "$filepath" 
-# echo "measurementInterval     : $measurementInterval" >> "$filepath" 
-# echo "areaFraction            : $areaFraction" >> "$filepath" 
-# echo "redD                    : $redD" >> "$filepath" 
-# echo "greenD                  : $greenD" >> "$filepath"
-# echo "greenPlusD              : $greenPlusD" >> "$filepath" 
-# echo "k                       : $k" >> "$filepath" #(($Pe*5))
-# echo "tau                     : $tau" >> "$filepath" 
-# echo "Pe                      : $Pe" >> "$filepath" 
-# echo "sigma                   : $sigma" >> "$filepath" 
-# echo "LennardJones            : $LennardJones" >> "$filepath" 
-# echo "skippedSteps            : $skippedSteps" >> "$filepath"
+# Write parameter file
+echo $filepath
+echo "stepLimit               : $stepLimit" > "$filepath" 
+echo "nGreenParticles         : $nGreenParticles" >> "$filepath" 
+echo "nRedParticles           : $nRedParticles" >> "$filepath" 
+echo "stepDuration            : $stepDuration" >> "$filepath" 
+echo "measurementInterval     : $measurementInterval" >> "$filepath" 
+echo "areaFraction            : $areaFraction" >> "$filepath" 
+echo "redD                    : $redD" >> "$filepath" 
+echo "greenD                  : $greenD" >> "$filepath"
+echo "greenPlusD              : $greenPlusD" >> "$filepath" 
+echo "k                       : $k" >> "$filepath" #(($Pe*5))
+echo "tau                     : $tau" >> "$filepath" 
+echo "Pe                      : $Pe" >> "$filepath" 
+echo "sigma                   : $sigma" >> "$filepath" 
+echo "LennardJones            : $LennardJones" >> "$filepath" 
+echo "skippedSteps            : $skippedSteps" >> "$filepath"
 
 #Modify the submission script (run_cluster.sh)
 sed -i "/#PBS -N */c\#PBS -N ${filepath}" run_cluster.sh #-i for inplace, searches patter /.../ and changes it (c) to \...
