@@ -60,6 +60,10 @@ The following parameters are given in the parameter file to set up the simulatio
 
 - tau: The duration of the excited state, which green particles enter upon contact with red particles. After this time they revert back to unexcited green particles.
 
+- Pe: The effective Peclet number of the system. Physcially this represents the degree of self-propulsion, measured in the number of cell diameters the cell travels in one time unit.
+
+- sigma: The effective radius of the effective force, in units of cell diameters. simga=1 represents a purely repulsive potential, with the force being zero exactly at the edge of the cell. Larger sigmas add a "sticky-zone" where the particles attracted each other when they get close to each other. 
+
 - LennardJones: Boolean value that decides whether or not to use a Lennard-Jones interaction between particles. If this is zero the simulation uses a much softer harmonic potential.
 
 - skippedSteps: This sets the number of steps for which no position measurements will be taken. This can be used to skip the initial period, where the system settles into a steady state, to avoid unecessaryly larege track files.
