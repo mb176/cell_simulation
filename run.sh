@@ -7,7 +7,7 @@ else
 fi
 
 
-#Genrate make file using cmakeu
+#Genrate make file using cmake
 cmake . -B build
 
 #compile

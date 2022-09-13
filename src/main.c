@@ -102,7 +102,6 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
             fflush(paramFile); //Flushes the buffer
         }
     }
-    writeTracks(); //Save positions to disk
 
     //Simulation duration
     t = clock() - t;

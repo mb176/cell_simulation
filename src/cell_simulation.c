@@ -107,14 +107,6 @@ void SetParameters(char** argv){
 void AllocArrays(){
     //Particle array
     MALLOC(particles, nParticles); //particles = (particle *) malloc(nParticles*(sizeof(particle)));
-    //Measurement arrays
-    MALLOC(measurementTimes, nMeasurements); //measurementTimes = (real *) malloc(nMeasurements*sizeof(real));
-    MALLOC(positionMeasurements, nMeasurements); //positionMeasurements = (VecR **) malloc(nMeasurements*sizeof(VecR *));
-    MALLOC(colorMeasurements, nMeasurements); //colorMeasurements = (int **) malloc(nMeasurements*sizeof(int*));
-    for(int idx = 0; idx < nMeasurements; idx++){
-        MALLOC(positionMeasurements[idx], nParticles); //positionMeasurements[idx] = (VecR *) malloc(nParticles*sizeof(particle));
-        MALLOC(colorMeasurements[idx], nParticles); //colorMeasurements[idx] = (int *) malloc(nParticles*sizeof(particle));
-    }   
     //Linked list for cells
     MALLOC_VERBOSE(cellList, (nParticles + VProd(cells)));//cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
 };
@@ -310,16 +302,22 @@ void InitialiseAngles(){
 
 
 void MeasurePositions(real time){
-    static int measurementIdx = 0;
     //Times
-    measurementTimes[measurementIdx] = time;
-    for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
-        //Positions
-        positionMeasurements[measurementIdx][particleIdx] = particles[particleIdx].r;
-        //Colors
-        colorMeasurements[measurementIdx][particleIdx] = particles[particleIdx].color;
-    }   
-    measurementIdx++;
+    fprintf(tracksFile, "%f", time);
+    for(int particleIdx = 0; particleIdx<nParticles; particleIdx++){
+        //Print color
+        if(particles[particleIdx].color ==0){
+            fprintf(tracksFile,", red");
+        } else if (particles[particleIdx].color ==1){
+            fprintf(tracksFile,", green");
+        } else if (particles[particleIdx].color == 2){
+            fprintf(tracksFile,", greenPlus");
+        }
+        //Print positions
+        fprintf(tracksFile,", %f, %f",particles[particleIdx].r.x, \
+                                      particles[particleIdx].r.y);
+    }
+    fprintf(tracksFile,"\n");
 };
 
 
@@ -536,35 +534,12 @@ void SingleStep (int stepIdx){
     EulerMaruyamaTheta();
     EnforcePeriodicBoundaries();
     UpdatePersistence();
-    int measurementSteps = measurementInterval/stepDuration; 
+    int measurementSteps = round(measurementInterval/stepDuration); 
     if(((stepIdx > skipSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
         MeasurePositions(stepIdx*stepDuration);
     } else if (stepIdx==(stepLimit-1)){ //Save final step (initial position is measured by SetUpJob()
         MeasurePositions(stepIdx*stepDuration);
     }
-}
-
-
-void writeTracks(){
-    for(int measurementIdx=0; measurementIdx<nMeasurements; measurementIdx++){
-        fprintf(tracksFile, "%f", measurementTimes[measurementIdx]);
-        for(int particleIdx = 0; particleIdx<nParticles; particleIdx++){
-            //Print color
-            if(colorMeasurements[measurementIdx][particleIdx] ==0){
-                fprintf(tracksFile,", red");
-            } else if (colorMeasurements[measurementIdx][particleIdx] ==1){
-                fprintf(tracksFile,", green");
-            } else if (colorMeasurements[measurementIdx][particleIdx] == 2){
-                fprintf(tracksFile,", greenPlus");
-            }
-            //Print positions
-            fprintf(tracksFile,", %f, %f",positionMeasurements[measurementIdx][particleIdx].x, \
-                                          positionMeasurements[measurementIdx][particleIdx].y);
-            
-        }
-        fprintf(tracksFile,"\n");
-    }
-
 }
 
 void cleanup(){
@@ -575,12 +550,6 @@ void cleanup(){
     //Free memory
     free(particles);
     free(cellList);
-    free(measurementTimes);
-    for(int idx = 0; idx < nMeasurements; idx++){
-        free(positionMeasurements[idx]);
-        free(colorMeasurements[idx]);
-    }
-    free(positionMeasurements);
-    free(colorMeasurements);
+    
 }
 
