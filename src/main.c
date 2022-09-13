@@ -32,23 +32,29 @@ int length=LENGTH;
 
 
 // Global parameter
-int stepLimit; //defines the duration of the simulation
+int stepLimit;
+real stepDuration;
+int skipSteps; //only after these steps will tracks be recorded (saves space)
+real measurementInterval; //at the end of each interval we measure all observables
 int nParticles;
 int nGreenParticles;
 int nRedParticles;
-real stepDuration;
 VecR region;  //Size of the simulation region
-real redD, greenD, greenPlusD; //rotational diffusion constants 
+real redD, greenD, greenPersistentD; //rotational diffusion constants 
 real k;  //potential strength
 real tau; //decay time of the persistent state
 real Pe; //self-propulsion velocity
-real sigma; //interaction distance, sigma>1 creates stickyness
-real measurementInterval; //at the end of each interval we measure all observables
+real potentialRange; //interaction distance, sigma>1s creates stickyness
 int nMeasurements;
 VecI initialCellsGreen; //2D vector containing the number of particles in the x and y direction
 VecI initialCellsRed;
 int LennardJones; //bool that says whether if we use Lennard Jones potential instead of harmonic interactions 
-int skippedSteps; //only after these steps will tracks be recorded (saves space)
+int turnAround; // Bool that flags wether the particles move away from each other after colision
+real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
+real greenGreenAdhesionMutl;
+real redGreenAdhesionMult;
+
+
 // Data structures
 uint64_t seed;
 struct xoshiro256ss_state rng;
@@ -82,6 +88,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     #ifdef DEBUG
     printf("DEBUG MODE\n");
     #endif
+    
     
     for(int stepIdx = 0; stepIdx < stepLimit; stepIdx++){
         //Iterate simulation, save positions at certain step indices

@@ -11,6 +11,7 @@
 #include "xoshiro_rng.h"
 #include "cell_simulation.h"
 #include "agent_simulation_config.h"
+#include "stdbool.h"
 
 
 //Gunnar's malloc macro, gives error if space can't be assigned (e.g. too big -> NULL returned from OS) and keeps taps on the ammount of space used 
@@ -18,8 +19,6 @@ long long int total_malloced=0LL;
 #define MALLOC(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a)));} }
 //The verbose version prints the space used
 #define MALLOC_VERBOSE(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a))); printf("# Info: %lli bytes malloced for %s, %lli in total so far.\n", (long long int)((n)*sizeof(*a)), #a, total_malloced); } }
-
-
 
 
 double getNextParameter(FILE * file, char * parameterName){
@@ -46,28 +45,32 @@ void SetParameters(char** argv){
     
     //Read out parameters
     stepLimit = getNextParameter(paramFile, "stepLimit");
+    stepDuration = getNextParameter(paramFile, "stepDuration");
+    skipSteps = getNextParameter(paramFile, "skipSteps"); 
+    measurementInterval = getNextParameter(paramFile, "measurementInterval");
     nGreenParticles = getNextParameter(paramFile, "nGreenParticles");
     nRedParticles = getNextParameter(paramFile, "nRedParticles");
-    stepDuration = getNextParameter(paramFile, "stepDuration");
-    measurementInterval = getNextParameter(paramFile, "measurementInterval");
     real areaFraction = getNextParameter(paramFile, "areaFraction");
     redD = getNextParameter(paramFile, "redD");
     greenD = getNextParameter(paramFile, "greenD");
-    greenPlusD = getNextParameter(paramFile, "greenPlusD");
+    greenPersistentD = getNextParameter(paramFile, "greenPersistentD");
     k = getNextParameter(paramFile, "k");
     tau = getNextParameter(paramFile, "tau");
     Pe = getNextParameter(paramFile, "Pe");
-    sigma = getNextParameter(paramFile, "sigma");
+    potentialRange = getNextParameter(paramFile, "potentialRange");
     LennardJones = getNextParameter(paramFile, "LennardJones");
-    skippedSteps = getNextParameter(paramFile, "skippedSteps"); 
+    turnAround = getNextParameter(paramFile, "turnAround");
+    redRedAdhesionMult = getNextParameter(paramFile,"redRedAdhesionMult");
+    greenGreenAdhesionMutl = getNextParameter(paramFile,"greenGreenAdhesionMutl");
+    redGreenAdhesionMult = getNextParameter(paramFile,"redGreenAdhesionMult");
 
     // Barricades
-    //measurementInterval must be a multiple of stepDuration
-    assert((measurementInterval/stepDuration)==floor(measurementInterval/stepDuration));
-    //Can't skip more steps than we have
-    assert(stepLimit>skippedSteps);
+    //measurementInterval must be a multiple of stepDuration 
+    assert((measurementInterval/stepDuration)-round(measurementInterval/stepDuration)< 1e-4);
     //The Simulation duration must be a multiple of measurementInterval
-    assert((stepLimit-skippedSteps)*(stepDuration/measurementInterval)==floor((stepLimit-skippedSteps)*(stepDuration/measurementInterval))); 
+    assert((stepLimit-skipSteps)*(stepDuration/measurementInterval)-round((stepLimit-skipSteps)*(stepDuration/measurementInterval))<1e-4); 
+    //Can't skip more steps than we have
+    assert(stepLimit>skipSteps);
     //Need it least 20 steps, otherwise the loading bar divides by zero
     assert(stepLimit>=20);
 
@@ -78,10 +81,10 @@ void SetParameters(char** argv){
     printf("length=%f \n",length);
     region = (VecR) {.x = length,
                      .y = length};  //Size of the simulation region
-    cells.x = region.x/(sigma); //Smallest cells that are larger than interaction range
-    cells.y = region.y/(sigma);
+    cells.x = region.x/(potentialRange); //Smallest cells that are larger than interaction range
+    cells.y = region.y/(potentialRange);
 
-    nMeasurements = (stepLimit-skippedSteps)*(stepDuration/measurementInterval) + 1; //+1 one because we do the first and the last step 
+    nMeasurements = round((stepLimit-skipSteps)*(stepDuration/measurementInterval)) + 1; //+1 one because we do the first and the last step 
     seed = SEED;//time(NULL);
     rng = xoshiro256ss_init(seed);
     srand(seed);
@@ -125,7 +128,7 @@ double fHarmonicPotential(const gsl_vector *v, void *params){
         positions[particleIdx].y = gsl_vector_get(v, 2*particleIdx + 1);
     }
     double * para = (double *) params;
-    double sigma = para[0];
+    double potentialRange = para[0];
 
     double V = 0;
     VecR deltaR;
@@ -135,7 +138,7 @@ double fHarmonicPotential(const gsl_vector *v, void *params){
             VSub(deltaR, positions[pIdx1],positions[pIdx2]);
             VWrapAllTang(deltaR); //Periodic Boundary conditions
             distance = sqrt(VLenSq(deltaR));
-            if(distance < sigma){
+            if(distance < potentialRange){
                 V += (distance-1)*(distance-1);
             }
         }
@@ -155,7 +158,7 @@ void dfHarmonicPotential(const gsl_vector *v, void *params, gsl_vector *df){
         positions[particleIdx].y = gsl_vector_get(v, 2*particleIdx + 1);
     }
     double * para = (double *) params;
-    double sigma = para[0]; //Interaction range
+    double potentialRange = para[0]; //Interaction range
     VecR deltaR;
     real distance;
     //Calculate gradient
@@ -170,7 +173,7 @@ void dfHarmonicPotential(const gsl_vector *v, void *params, gsl_vector *df){
                     VecR direction = {.x = 1, .y = 1};
                     VSAdd(gradient[gradientIdx], gradient[gradientIdx], -2, direction);
                 }
-                else if(distance < sigma){
+                else if(distance < potentialRange){
                     VSAdd(gradient[gradientIdx], gradient[gradientIdx], 2*(1-1/distance), deltaR);
                 }
             }
@@ -330,7 +333,7 @@ void SetUpJob(){
 
 //Begin: Support Functions for Single Step
 real HarmonicForce(real distance){
-    return -k/distance*(distance-1); //WARNING: this needs to be changed if we don't measure in units of sigma
+    return -k/distance*(distance-1); //WARNING: this needs to be changed if we don't measure in units of potentialRange
 }
 
 real LennardJonesForce(real distance){
@@ -398,7 +401,7 @@ void ComputeInteractions(){
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
-                            if(distance < sigma){ //Do particles interact?
+                            if(distance < potentialRange){ //Do particles interact?
                                 //Forces: 
                                 if(LennardJones==1){
                                     forceMagnitude = LennardJonesForce(distance);
@@ -413,7 +416,7 @@ void ComputeInteractions(){
                                 //Persistence change (no refreshing)
                                 if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
                                     particles[pIdx1].color = 2;
-                                    particles[pIdx1].D = greenPlusD;
+                                    particles[pIdx1].D = greenPersistentD;
                                     particles[pIdx1].decayTimer = tau;
                                     //Contact inhibited locomotion: Cells move away after contact
                                     real theta = GetAngle(deltaR);
@@ -423,7 +426,7 @@ void ComputeInteractions(){
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
-                                    particles[pIdx2].D = greenPlusD;
+                                    particles[pIdx2].D = greenPersistentD;
                                     particles[pIdx2].decayTimer = tau;
                                     //Contact inhibited locomotion: Cells move away after contact
                                     real theta = GetAngle(deltaR);
@@ -534,7 +537,7 @@ void SingleStep (int stepIdx){
     EnforcePeriodicBoundaries();
     UpdatePersistence();
     int measurementSteps = measurementInterval/stepDuration; 
-    if(((stepIdx > skippedSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
+    if(((stepIdx > skipSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
         MeasurePositions(stepIdx*stepDuration);
     } else if (stepIdx==(stepLimit-1)){ //Save final step (initial position is measured by SetUpJob()
         MeasurePositions(stepIdx*stepDuration);
