@@ -3,7 +3,7 @@
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/new_test_parameters"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/adhesion"
 fi
 
 

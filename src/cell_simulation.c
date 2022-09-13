@@ -339,7 +339,7 @@ real LennardJonesForce(real distance){
     //WARNING: needs to be changed if cellRadius!=1
     double invDistance = length/(distance); 
     double invDistance6=invDistance*invDistance*invDistance*invDistance*invDistance*invDistance;
-    return 48*k*invDistance6*(invDistance6-0.5)*invDistance*invDistance;
+    return 48*k*invDistance6*(invDistance6-0.5)/(distance*distance);
 }
 
 real GetAngle(VecR r){
@@ -399,53 +399,78 @@ void ComputeInteractions(){
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
-                            if(distance < potentialRange){ //Do particles interact?
-                                //Forces: 
-                                if(LennardJones==1){
-                                    forceMagnitude = LennardJonesForce(distance);
-                                } else {
-                                    forceMagnitude = HarmonicForce(distance);
-                                }
-                                 //LennardJonesForce(distance); 
-                                VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
-                                VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
-                            }
                             if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
-                                //Persistence change (no refreshing)
+                                //Persistence change
                                 if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
                                     particles[pIdx1].color = 2;
                                     particles[pIdx1].D = greenPersistentD;
                                     particles[pIdx1].decayTimer = tau;
-                                    //Contact inhibited locomotion: Cells move away after contact
-                                    real theta = GetAngle(deltaR);
-                                    particles[pIdx1].theta = theta;
-                                    particles[pIdx2].theta = theta + M_PI;
-
+                                    if(turnAround==1){
+                                        //Contact inhibition of locomotion: Cells move away after contact
+                                        real theta = GetAngle(deltaR);
+                                        particles[pIdx1].theta = theta;
+                                        particles[pIdx2].theta = theta + M_PI;
+                                    }
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
                                     particles[pIdx2].D = greenPersistentD;
                                     particles[pIdx2].decayTimer = tau;
-                                    //Contact inhibited locomotion: Cells move away after contact
-                                    real theta = GetAngle(deltaR);
-                                    particles[pIdx1].theta = theta;
-                                    particles[pIdx2].theta = theta + M_PI;
-                                    
-                                } else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
-                                    //Contact inhibited locomotion: Cells move away after contact
-                                    real theta = GetAngle(deltaR);
-                                    particles[pIdx1].theta = theta;
-                                    particles[pIdx2].theta = theta + M_PI;
-                                    
-                                } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
-                                    //Contact inhibited locomotion: Cells move away after contact
-                                    real theta = GetAngle(deltaR);
-                                    particles[pIdx1].theta = theta;
-                                    particles[pIdx2].theta = theta + M_PI;
-                                    
+                                    if(turnAround==1){
+                                        //Contact inhibition of locomotion: Cells move away after contact
+                                        real theta = GetAngle(deltaR);
+                                        particles[pIdx1].theta = theta;
+                                        particles[pIdx2].theta = theta + M_PI;
+                                    }   
                                 }
+                                
+                                 else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
+                                    if(turnAround==1){
+                                        //Contact inhibition of locomotion: Cells move away after contact
+                                        real theta = GetAngle(deltaR);
+                                        particles[pIdx1].theta = theta;
+                                        particles[pIdx2].theta = theta + M_PI;
+                                    }
+                                } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
+                                    if(turnAround==1){
+                                        //Contact inhibition of locomotion: Cells move away after contact
+                                        real theta = GetAngle(deltaR);
+                                        particles[pIdx1].theta = theta;
+                                        particles[pIdx2].theta = theta + M_PI;
+                                    }
+                                }
+                                //Repulsive forces
+                                if(LennardJones==1){
+                                    forceMagnitude = LennardJonesForce(distance);
+                                } else {
+                                    forceMagnitude = HarmonicForce(distance);
+                                }
+                                VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
+                                VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
 
+                            } else if(distance < potentialRange){ //Are particles within attraction range, but not touching?
+                                // Attractive forces
+                                if(LennardJones==1){
+                                    forceMagnitude = LennardJonesForce(distance);
+                                } else {
+                                    forceMagnitude = HarmonicForce(distance);
+                                }
+                                
+                                //Are these two red particles?
+                                if(particles[pIdx1].color==0 && particles[pIdx2].color==0){
+                                    VVSAdd(particles[pIdx1].force,redRedAdhesionMult*forceMagnitude,deltaR);
+                                    VVSAdd(particles[pIdx2].force,-redRedAdhesionMult*forceMagnitude,deltaR);
+                                } //Are these two green particles?
+                                else if((particles[pIdx1].color==1 || particles[pIdx1].color==2) && (particles[pIdx2].color==1 || particles[pIdx2].color==2)){
+                                    VVSAdd(particles[pIdx1].force,greenGreenAdhesionMutl*forceMagnitude,deltaR);
+                                    VVSAdd(particles[pIdx2].force,-greenGreenAdhesionMutl*forceMagnitude,deltaR);
+                                } // There are opposite-color particles
+                                else {
+                                    VVSAdd(particles[pIdx1].force,redGreenAdhesionMult*forceMagnitude,deltaR);
+                                    VVSAdd(particles[pIdx2].force,-redGreenAdhesionMult*forceMagnitude,deltaR);
+                                }
                             }
+
                         }
                     }
                 }
