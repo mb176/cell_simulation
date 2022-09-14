@@ -335,11 +335,11 @@ real HarmonicForce(real distance){
 }
 
 real LennardJonesForce(real distance){
-    double length = 0.890898718140339; //=0.5^(1/6) This value makes sure the potential decayes to zero for r=1 
     //WARNING: needs to be changed if cellRadius!=1
-    double invDistance = length/(distance); 
-    double invDistance6=invDistance*invDistance*invDistance*invDistance*invDistance*invDistance;
-    return 48*k*invDistance6*(invDistance6-0.5)/(distance*distance);
+    double invDistance = 1/(distance); 
+    double invDistance2 = invDistance*invDistance;
+    double invDistance6=invDistance2*invDistance2*invDistance2;
+    return 12*k*invDistance6*(invDistance6-1)*invDistance2;
 }
 
 real GetAngle(VecR r){

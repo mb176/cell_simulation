@@ -2,24 +2,26 @@
 
 #setting the parameters
 stepLimit=1e6
-nGreenParticles=2000
-nRedParticles=2000
-stepDuration=1e-5 #200*60*0.00005 = 0.6 seconds
+stepDuration=1e-5
+skipSteps=0
 measurementInterval=1e-1
-declare -a areaFractionList
-areaFractionList=(0.5)
+nGreenParticles=2000  
+nRedParticles=2000
+areaFractionList=(0.3 0.5 0.7 0.8 0.85)
 redD=3
 greenD=3
-greenPlusD=0.3
-k=100 #Set as 5xPe 
-tau=0.25
-declare -a PeList
-PeList=(80)
-sigma=1.0
+greenPersistentD=3
+k=10
+tau=0.05
+PeList=(10 20 40 80 120 150)
+potentialRange=1.108
 LennardJones=1
-skippedSteps=0
+turnAround=0
+#redRedAdhesionMult=
+#greenGreenAdhesionMutl  : 0
+redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/output/test"
+TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -37,20 +39,25 @@ filepath="${TARGET_FOLDER}/areaFraction_${areaFraction}_Pe_${Pe}"
 # Write parameter file
 echo $filepath
 echo "stepLimit               : $stepLimit" > "$filepath" 
+echo "stepDuration            : $stepDuration" >> "$filepath" 
+echo "skipSteps               : $skipSteps" >> "$filepath"
+echo "measurementInterval     : $measurementInterval" >> "$filepath" 
 echo "nGreenParticles         : $nGreenParticles" >> "$filepath" 
 echo "nRedParticles           : $nRedParticles" >> "$filepath" 
-echo "stepDuration            : $stepDuration" >> "$filepath" 
-echo "measurementInterval     : $measurementInterval" >> "$filepath" 
 echo "areaFraction            : $areaFraction" >> "$filepath" 
 echo "redD                    : $redD" >> "$filepath" 
 echo "greenD                  : $greenD" >> "$filepath"
-echo "greenPlusD              : $greenPlusD" >> "$filepath" 
+echo "greenPersistentD        : $greenPersistentD" >> "$filepath" 
 echo "k                       : $k" >> "$filepath" #(($Pe*5))
 echo "tau                     : $tau" >> "$filepath" 
 echo "Pe                      : $Pe" >> "$filepath" 
-echo "sigma                   : $sigma" >> "$filepath" 
+echo "potentialRange          : $potentialRange" >> "$filepath" 
 echo "LennardJones            : $LennardJones" >> "$filepath" 
-echo "skippedSteps            : $skippedSteps" >> "$filepath"
+echo "turnAround              : $turnAround" >> "$filepath"
+echo "redRedAdhesionMult      : $((${Pe}/${k}*5/12))" >> "$filepath"
+echo "greenGreenAdhesionMutl  : $((${Pe}/${k}*5/12))" >> "$filepath"
+echo "redGreenAdhesionMult    : $redGreenAdhesionMult" >> "$filepath"
+
 
 #Modify the submission script (run_cluster.sh)
 sed -i "/#PBS -N */c\#PBS -N ${filepath}" run_cluster.sh #-i for inplace, searches patter /.../ and changes it (c) to \...

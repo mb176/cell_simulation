@@ -6,7 +6,8 @@ else
     parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/adhesion"
 fi
 
-
+can=5
+echo "$((${can}*5))"
 #Genrate make file using cmake
 cmake . -B build
 
