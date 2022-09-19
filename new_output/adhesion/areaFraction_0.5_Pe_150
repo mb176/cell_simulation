@@ -17,3 +17,13 @@ turnAround              : 0
 redRedAdhesionMult      : 6
 greenGreenAdhesionMutl  : 6
 redGreenAdhesionMult    : 0
+nParticles              : 4000
+Length                  : 79.266538
+Seed                    : 1 
+
+LOGFILE: Wed Sep 14 10:12:03 2022
+Initial Potential Energy: 661.756526 
+Potential energy after 127/8000 iterations: 0.000000 
+Begin Simulation... 
+||||||||||||||||||||
+Simulation ended after 2684.611646 seconds 

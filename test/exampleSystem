@@ -1,0 +1,29 @@
+stepLimit               : 1e4
+stepDuration            : 1e-5
+skipSteps               : 0
+measurementInterval     : 0.0005
+nGreenParticles         : 200
+nRedParticles           : 200
+areaFraction            : 0.45
+redD                    : 1
+greenD                  : 1
+greenPersistentD        : 0.2
+k                       : 20
+tau                     : 0.01
+Pe                      : 70
+potentialRange          : 1.0
+LennardJones            : 1
+turnAround              : 0
+redRedAdhesionMult      : 0
+greenGreenAdhesionMutl  : 0
+redGreenAdhesionMult    : 0
+nParticles              : 400
+Length                  : 26.422179
+Seed                    : 1663622238 
+
+LOGFILE: Mon Sep 19 22:17:18 2022
+Initial Potential Energy: 57.403451 
+Potential energy after 103/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 1.946721 seconds 

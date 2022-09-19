@@ -83,14 +83,21 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     
     SetParameters(argv);
     SetUpJob();
+    //Logs
     printf("Begin Simulation... \n");
     fprintf(paramFile,"Begin Simulation... \n");
     #ifdef DEBUG
     printf("DEBUG MODE\n");
+    fprintf(paramFile,"DEBUG MODE\n");
+    #endif
+    #ifdef turnAroundVariation
+    double maxAngle = 360/(2*3.1416)*turnAroundVariation; 
+    printf("Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
+    fprintf(paramFile,"Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
     #endif
     
     
-    for(int stepIdx = 0; stepIdx < stepLimit; stepIdx++){
+    for(int stepIdx = 0; stepIdx <= stepLimit; stepIdx++){
         //Iterate simulation, save positions at certain step indices
         SingleStep(stepIdx);
 

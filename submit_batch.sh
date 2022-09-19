@@ -7,21 +7,21 @@ skipSteps=0
 measurementInterval=1e-1
 nGreenParticles=2000  
 nRedParticles=2000
-areaFractionList=(0.3 0.5 0.7 0.8 0.85)
+areaFractionList=(0.7 0.8 0.82 0.85 0.88)
 redD=3
 greenD=3
 greenPersistentD=3
-k=10
+k=100
 tau=0.05
-PeList=(10 20 40 80 120 150)
-potentialRange=1.108
+PeList=(80 120 150)
+potentialRange=1
 LennardJones=1
-turnAround=0
-#redRedAdhesionMult=
-#greenGreenAdhesionMutl  : 0
+turnAround=1
+redRedAdhesionMult=0
+greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion"
+TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/turnAround_persistence"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -54,8 +54,8 @@ echo "Pe                      : $Pe" >> "$filepath"
 echo "potentialRange          : $potentialRange" >> "$filepath" 
 echo "LennardJones            : $LennardJones" >> "$filepath" 
 echo "turnAround              : $turnAround" >> "$filepath"
-echo "redRedAdhesionMult      : $((${Pe}/${k}*5/12))" >> "$filepath"
-echo "greenGreenAdhesionMutl  : $((${Pe}/${k}*5/12))" >> "$filepath"
+echo "redRedAdhesionMult      : $redRedAdhesionMult" >> "$filepath"
+echo "greenGreenAdhesionMutl  : $greenGreenAdhesionMutl" >> "$filepath"
 echo "redGreenAdhesionMult    : $redGreenAdhesionMult" >> "$filepath"
 
 

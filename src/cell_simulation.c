@@ -352,6 +352,28 @@ real GetAngle(VecR r){
     return theta;
 }
 
+void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
+    //Particles turn away from each other after contact
+    if(turnAround==1){
+        real theta = GetAngle(deltaR);
+
+        #ifdef turnAroundVariation 
+        // //Randomise the turn-around directions
+        double randomAngle1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
+        double randomAngle2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
+        printf("%f \n", 360/(2*3.1416)*(randomAngle1-randomAngle2));
+        fflush(stdout);
+        particles[pIdx1].theta = randomAngle1; //theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
+        particles[pIdx2].theta = randomAngle2; //theta + M_PI + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
+        #else
+        particles[pIdx1].theta = theta;
+        particles[pIdx2].theta = theta + M_PI;
+        #endif
+    }
+    
+
+}
+
 void ComputeInteractions(){
     //Build Linked list
     VecR cellWidth;
@@ -405,39 +427,18 @@ void ComputeInteractions(){
                                     particles[pIdx1].color = 2;
                                     particles[pIdx1].D = greenPersistentD;
                                     particles[pIdx1].decayTimer = tau;
-                                    if(turnAround==1){
-                                        //Contact inhibition of locomotion: Cells move away after contact
-                                        real theta = GetAngle(deltaR);
-                                        particles[pIdx1].theta = theta;
-                                        particles[pIdx2].theta = theta + M_PI;
-                                    }
+                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
                                     particles[pIdx2].D = greenPersistentD;
                                     particles[pIdx2].decayTimer = tau;
-                                    if(turnAround==1){
-                                        //Contact inhibition of locomotion: Cells move away after contact
-                                        real theta = GetAngle(deltaR);
-                                        particles[pIdx1].theta = theta;
-                                        particles[pIdx2].theta = theta + M_PI;
-                                    }   
+                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
-                                
-                                 else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
-                                    if(turnAround==1){
-                                        //Contact inhibition of locomotion: Cells move away after contact
-                                        real theta = GetAngle(deltaR);
-                                        particles[pIdx1].theta = theta;
-                                        particles[pIdx2].theta = theta + M_PI;
-                                    }
+                                else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
+                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
-                                    if(turnAround==1){
-                                        //Contact inhibition of locomotion: Cells move away after contact
-                                        real theta = GetAngle(deltaR);
-                                        particles[pIdx1].theta = theta;
-                                        particles[pIdx2].theta = theta + M_PI;
-                                    }
+                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
                                 //Repulsive forces
                                 if(LennardJones==1){

@@ -3,11 +3,9 @@
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output/test/adhesion"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/test/exampleSystem"
 fi
 
-can=5
-echo "$((${can}*5))"
 #Genrate make file using cmake
 cmake . -B build
 
@@ -19,5 +17,6 @@ cmake --build build --config Debug
 
 #Analysis
 # echo "Plotting the tracks..."
-# python3 ../analysis/final_snapshot_simulation.py $parameterFile
-python3 ../analysis/animation_simulation.py $parameterFile
+python3 ../analysis/final_snapshot_simulation.py $parameterFile
+# python3 ../analysis/animation_simulation.py $parameterFile
+# python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_simulation.py $parameterFile
