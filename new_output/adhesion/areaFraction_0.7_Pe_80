@@ -1,29 +1,301 @@
 stepLimit               : 1e6
 stepDuration            : 1e-5
 skipSteps               : 0
-measurementInterval     : 1e-1
+measurementInterval     : 1e0
 nGreenParticles         : 2000
 nRedParticles           : 2000
 areaFraction            : 0.7
 redD                    : 3
 greenD                  : 3
 greenPersistentD        : 3
-k                       : 10
-tau                     : 0.05
+k                       : 33
+tau                     : 0.1
 Pe                      : 80
-potentialRange          : 1.108
+potentialRange          : 1.10866
 LennardJones            : 1
 turnAround              : 0
-redRedAdhesionMult      : 3
-greenGreenAdhesionMutl  : 3
+redRedAdhesionMult      : 1
+greenGreenAdhesionMutl  : 1
 redGreenAdhesionMult    : 0
 nParticles              : 4000
 Length                  : 66.992452
-Seed                    : 1 
+Seed                    : 1664287940 
 
-LOGFILE: Wed Sep 14 10:11:58 2022
-Initial Potential Energy: 929.323398 
-Potential energy after 290/8000 iterations: 0.000000 
+LOGFILE: Tue Sep 27 15:12:20 2022
+Initial Potential Energy: 904.761303 
+Potential energy after 382/8000 iterations: 0.000000 
 Begin Simulation... 
-||||||||||||||||||||
-Simulation ended after 4353.304245 seconds 
+|||||||||||||||||||||
+Simulation ended after 2366.289610 seconds 
+eaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 910.090525 
+Potential energy after 336/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2339.222380 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_2.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 949.957692 
+Potential energy after 403/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2381.534222 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_3.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 917.969641 
+Potential energy after 412/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2368.433270 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_4.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 915.222747 
+Potential energy after 331/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2343.360592 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_5.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 931.516869 
+Potential energy after 395/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2394.760810 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_6.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 914.605212 
+Potential energy after 409/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2379.585533 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_7.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 974.391508 
+Potential energy after 398/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2367.933370 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_8.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 954.210228 
+Potential energy after 391/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2388.076028 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_9.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 947.380254 
+Potential energy after 320/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2337.486089 seconds 
+Parameter file: /home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/adhesion/areaFraction_0.7_Pe_80_tracks_10.csv
+Initialise paramters:
+stepLimit = 1000000.000000 
+stepDuration = 0.000010 
+skipSteps = 0.000000 
+measurementInterval = 1.000000 
+nGreenParticles = 2000.000000 
+nRedParticles = 2000.000000 
+areaFraction = 0.700000 
+redD = 3.000000 
+greenD = 3.000000 
+greenPersistentD = 3.000000 
+k = 33.000000 
+tau = 0.100000 
+Pe = 80.000000 
+potentialRange = 1.108660 
+LennardJones = 1.000000 
+turnAround = 0.000000 
+redRedAdhesionMult = 1.000000 
+greenGreenAdhesionMutl = 1.000000 
+redGreenAdhesionMult = 0.000000 
+length=66.992452 
+# Info: 30400 bytes malloced for cellList, 286400 in total so far.
+Initial Potential Energy: 904.761303 
+Potential energy after 382/8000 iterations: 0.000000 
+Begin Simulation... 
+|||||||||||||||||||||
+Simulation ended after 2366.289610 seconds 

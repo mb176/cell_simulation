@@ -35,13 +35,25 @@ double getNextParameter(FILE * file, char * parameterName){
     return val;
 }
 
-void SetParameters(char** argv){
-    char * PATH = argv[1];
+void SetParameters(int argc, char** argv){
+    char * PATH;
+    char * trackFileSuffix;
+    if(argc==2){ //Tracks file name unspecified
+        PATH = argv[1];
+        trackFileSuffix = "_tracks.csv";
+    } else if (argc==3){ //Tracks file name specified
+        PATH = argv[1];
+        trackFileSuffix = argv[2];
+    } else {
+        assert(false); // main needs at least one and at most two command line inputs
+    }
+    
+    // Files
+    paramFile = fopen(PATH,"r+");
+    tracksFile = fopen(strcat(PATH,trackFileSuffix),"w");
+
     printf("Parameter file: "); printf(PATH); printf("\n");
     printf("Initialise paramters:\n");
-    
-    // FILE * paramFile;
-    paramFile = fopen(PATH,"r+");
     
     //Read out parameters
     stepLimit = getNextParameter(paramFile, "stepLimit");
@@ -89,9 +101,6 @@ void SetParameters(char** argv){
     rng = xoshiro256ss_init(seed);
     srand(seed);
 
-    char  suffix[] = "_tracks.csv";
-    // char * name = strcat(PATH,suffix);
-    tracksFile = fopen(strcat(PATH,suffix),"w");
     //append the file
     fprintf(paramFile, "nParticles              : %i\n",nParticles);
     fprintf(paramFile, "Length                  : %f\n",length);
@@ -361,8 +370,6 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
         // //Randomise the turn-around directions
         double randomAngle1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
         double randomAngle2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        printf("%f \n", 360/(2*3.1416)*(randomAngle1-randomAngle2));
-        fflush(stdout);
         particles[pIdx1].theta = randomAngle1; //theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
         particles[pIdx2].theta = randomAngle2; //theta + M_PI + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
         #else

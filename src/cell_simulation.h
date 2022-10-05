@@ -18,7 +18,7 @@
 
 double getNextParameter(FILE * file, char * parameterName);
 
-void SetParameters(char** argv);
+void SetParameters(int argc, char** argv);
 
 void AllocArrays();
 

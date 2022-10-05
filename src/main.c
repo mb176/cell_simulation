@@ -81,7 +81,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     t = clock();
     
     
-    SetParameters(argv);
+    SetParameters(argc, argv);
     SetUpJob();
     //Logs
     printf("Begin Simulation... \n");

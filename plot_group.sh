@@ -4,16 +4,16 @@
 stepLimit=1e6
 stepDuration=1e-5
 skipSteps=0
-measurementInterval=1e-1
+measurementInterval=1e0
 nGreenParticles=2000  
 nRedParticles=2000
-areaFractionList=(0.7 0.8 0.82 0.85 0.88)
+areaFractionList=(0.3 0.5 0.7 0.8)
 redD=3
 greenD=3
-greenPersistentD=3
-k=100
-tau=0.05
-PeList=(80 120 150)
+greenPersistentD=0.1
+k=50
+tau=0.1
+PeList=(40 80 120 160)
 potentialRange=1
 LennardJones=1
 turnAround=1
@@ -30,11 +30,7 @@ for areaFraction in "${areaFractionList[@]}"
 do
 filepath="${TARGET_FOLDER}/areaFraction_${areaFraction}_Pe_${Pe}"
 
-
-# python3 /home/marius/PhD/CellMotility/analysis/animation_simulation.py "${filepath}"
-python3 /home/marius/PhD/CellMotility/analysis/final_snapshot_simulation.py "${filepath}"
-# python3 /home/marius/PhD/CellMotility/analysis/mixing_index_simulation.py "${filepath}"
-# python3 /home/marius/PhD/CellMotility/analysis/cluster_analysis_simulation.py "${filepath}"
+python3 ../analysis/write_mixing_index_sim.py $filepath
 
 done
 done
@@ -42,6 +38,6 @@ done
 
 
 #Plot the mixing index
-# python3 ../analysis/plot_mixing_index_simulation.py "${TARGET_FOLDER}/mixingIndex"
+python3 ../analysis/plot_mixing_index_sim.py "${TARGET_FOLDER}/mixingIndex"
 
 
