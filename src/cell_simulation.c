@@ -478,7 +478,6 @@ void ComputeInteractions(){
                                     VVSAdd(particles[pIdx2].force,-redGreenAdhesionMult*forceMagnitude,deltaR);
                                 }
                             }
-
                         }
                     }
                 }
