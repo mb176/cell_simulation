@@ -35,6 +35,6 @@ python3 ../analysis/write_clustering_sim.py $parameterFile
 
 # echo "Plotting the tracks..."
 # python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/animation_simulation.py "${parameterFile}"
-# python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/final_snapshot_simulation.py "${parameterFile}"
+python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/plot_last_frame_sim.py "${parameterFile}"
 # python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/calculate_mixing_index_simulation.py "${parameterFile}"
 # python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/cluster_analysis_simulation.py "${parameterFile}"

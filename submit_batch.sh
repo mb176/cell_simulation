@@ -9,14 +9,14 @@ skipSteps=0
 measurementInterval=1e0
 nGreenParticles=2000  
 nRedParticles=2000
-areaFractionList=(0.7 0.8)
-redD=3
-greenD=3
-greenPersistentD=0.1
+areaFractionList=(0.2 0.3 0.4 0.6)
+redD=15
+greenD=15
+greenPersistentD=1
 k=50
-tau=0.1
+tau=0.02
 PeList=(40 80 120 160)
-potentialRange=1 #1.10868
+potentialRange=1.10868
 LennardJones=1
 turnAround=1
 redRedAdhesionMult=0
@@ -25,7 +25,7 @@ redGreenAdhesionMult=0
 
 nReps=10 #How often the simulation is to be repeated
 
-TARGET_FOLDER="/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output/turnAround_persistence_t_100"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_new_CIL/adhesion_persistence_15_1/tau_0.02"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -41,8 +41,9 @@ do
 filepath="${TARGET_FOLDER}/areaFraction_${areaFraction}_Pe_${Pe}"
 
 # Write parameter file
-# redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
-# greenGreenAdhesionMutl=$(bc <<< "scale=5; 0.37176*$Pe/$k")
+redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
+greenGreenAdhesionMutl=$(bc <<< "scale=5; 0.37176*$Pe/$k")
+redGreenAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 
 echo $filepath
 echo "stepLimit               : $stepLimit" > "$filepath" 

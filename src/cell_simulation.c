@@ -351,7 +351,7 @@ real LennardJonesForce(real distance){
     return 12*k*invDistance6*(invDistance6-1)*invDistance2;
 }
 
-real GetAngle(VecR r){
+real getAngle(VecR r){
     double theta;
     if(r.x>=0){
         theta = atan(r.y/r.x);
@@ -364,7 +364,7 @@ real GetAngle(VecR r){
 void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
     //Particles turn away from each other after contact
     if(turnAround==1){
-        real theta = GetAngle(deltaR);
+        real theta = getAngle(deltaR);
 
         #ifdef turnAroundVariation 
         // //Randomise the turn-around directions
@@ -434,19 +434,16 @@ void ComputeInteractions(){
                                     particles[pIdx1].color = 2;
                                     particles[pIdx1].D = greenPersistentD;
                                     particles[pIdx1].decayTimer = tau;
-                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
                                     particles[pIdx2].D = greenPersistentD;
                                     particles[pIdx2].decayTimer = tau;
-                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
-                                else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
-                                    changeDirection(pIdx1, pIdx2, deltaR);
-                                } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
-                                    changeDirection(pIdx1, pIdx2, deltaR);
-                                }
+
+                                //Direction change (CIL)
+                                changeDirection(pIdx1, pIdx2, deltaR);
+
                                 //Repulsive forces
                                 if(LennardJones==1){
                                     forceMagnitude = LennardJonesForce(distance);
