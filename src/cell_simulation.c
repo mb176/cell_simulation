@@ -309,7 +309,6 @@ void InitialiseAngles(){
     // }
 };
 
-
 void MeasurePositions(real time){
     //Times
     fprintf(tracksFile, "%f", time);
@@ -328,7 +327,6 @@ void MeasurePositions(real time){
     }
     fprintf(tracksFile,"\n");
 };
-
 
 void SetUpJob(){
     AllocArrays();
@@ -363,21 +361,23 @@ real getAngle(VecR r){
 
 void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
     //Particles turn away from each other after contact
-    if(turnAround==1){
-        real theta = getAngle(deltaR);
-
-        #ifdef turnAroundVariation 
-        // //Randomise the turn-around directions
-        double randomAngle1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        double randomAngle2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        particles[pIdx1].theta = randomAngle1; //theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        particles[pIdx2].theta = randomAngle2; //theta + M_PI + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        #else
-        particles[pIdx1].theta = theta;
-        particles[pIdx2].theta = theta + M_PI;
-        #endif
-    }
     
+    real theta = getAngle(deltaR);
+    real deltaTheta1, deltaTheta2;
+
+
+    #ifdef turnAroundVariation 
+    // //Randomise the turn-around directions
+    deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
+    deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
+    #else
+    deltaTheta1 = theta - particles[pIdx1].theta;
+    deltaTheta2 = theta + M_PI - particles[pIdx2].theta;
+    #endif
+    
+    //Align velocity with the new direction based on how big turnAround is
+    particles[pIdx1].theta += deltaTheta1*turnAround;
+    particles[pIdx2].theta += deltaTheta2*turnAround;
 
 }
 
@@ -442,7 +442,9 @@ void ComputeInteractions(){
                                 }
 
                                 //Direction change (CIL)
-                                changeDirection(pIdx1, pIdx2, deltaR);
+                                if(turnAround>0){
+                                    changeDirection(pIdx1, pIdx2, deltaR);
+                                }
 
                                 //Repulsive forces
                                 if(LennardJones==1){

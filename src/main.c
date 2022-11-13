@@ -49,7 +49,7 @@ int nMeasurements;
 VecI initialCellsGreen; //2D vector containing the number of particles in the x and y direction
 VecI initialCellsRed;
 int LennardJones; //bool that says whether if we use Lennard Jones potential instead of harmonic interactions 
-int turnAround; // Bool that flags wether the particles move away from each other after colision
+real turnAround; // Number that flags wether the particles move away from each other after colision. If smaller than 1 the cells wil lonly turn by a percentage
 real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
 real greenGreenAdhesionMutl;
 real redGreenAdhesionMult;

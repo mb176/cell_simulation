@@ -24,7 +24,7 @@ extern int nMeasurements;
 extern VecI initialCellsGreen; //2D vector containing the number of particles in the x and y direction
 extern VecI initialCellsRed;
 extern int LennardJones; //bool that says whether if we use Lennard Jones potential instead of harmonic interactions 
-extern int turnAround; // Bool that flags wether the particles move away from each other after colision
+extern real turnAround; // Bool that flags wether the particles move away from each other after colision
 extern real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
 extern real greenGreenAdhesionMutl;
 extern real redGreenAdhesionMult;
