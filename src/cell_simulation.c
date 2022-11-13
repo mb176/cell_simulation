@@ -361,24 +361,28 @@ real GetAngle(VecR r){
     return theta;
 }
 
-void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
-    //Particles turn away from each other after contact
-    if(turnAround==1){
-        real theta = GetAngle(deltaR);
+void changeDirection(int pIdx1, int pIdx2, VecR deltaR, real multiplier){
+    if (turnAround>0){
+        //Particles turn away from each other after contact
+        
+        real theta = getAngle(deltaR);
+        real deltaTheta1, deltaTheta2;
+
 
         #ifdef turnAroundVariation 
         // //Randomise the turn-around directions
-        double randomAngle1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        double randomAngle2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        particles[pIdx1].theta = randomAngle1; //theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
-        particles[pIdx2].theta = randomAngle2; //theta + M_PI + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation;
+        deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
+        deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
         #else
-        particles[pIdx1].theta = theta;
-        particles[pIdx2].theta = theta + M_PI;
+        deltaTheta1 = theta - particles[pIdx1].theta;
+        deltaTheta2 = theta + M_PI - particles[pIdx2].theta;
         #endif
+        
+        //Align velocity with the new direction based on how big turnAround is
+        particles[pIdx1].theta += deltaTheta1*multiplier;
+        particles[pIdx2].theta += deltaTheta2*multiplier;
+        
     }
-    
-
 }
 
 void ComputeInteractions(){
@@ -434,19 +438,26 @@ void ComputeInteractions(){
                                     particles[pIdx1].color = 2;
                                     particles[pIdx1].D = greenPersistentD;
                                     particles[pIdx1].decayTimer = tau;
-                                    changeDirection(pIdx1, pIdx2, deltaR);
+                                    changeDirection(pIdx1, pIdx2, deltaR,1);
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
                                     particles[pIdx2].color = 2;
                                     particles[pIdx2].D = greenPersistentD;
                                     particles[pIdx2].decayTimer = tau;
-                                    changeDirection(pIdx1, pIdx2, deltaR);
                                 }
-                                else if (particles[pIdx1].color==2 && particles[pIdx2].color==0){
-                                    changeDirection(pIdx1, pIdx2, deltaR);
-                                } else if (particles[pIdx1].color==0 && particles[pIdx2].color==2){
-                                    changeDirection(pIdx1, pIdx2, deltaR);
+                                // CIL
+                                //Are these two red particles?
+                                if(particles[pIdx1].color==0 && particles[pIdx2].color==0){
+                                    changeDirection(pIdx1, pIdx2, deltaR,turnAround);
+                                } //Are these two green particles?
+                                else if((particles[pIdx1].color==1 || particles[pIdx1].color==2) && (particles[pIdx2].color==1 || particles[pIdx2].color==2)){
+                                    changeDirection(pIdx1, pIdx2, deltaR,turnAround);
+                                } // There are opposite-color particles
+                                else {
+                                    changeDirection(pIdx1, pIdx2, deltaR,1);
                                 }
+
+
                                 //Repulsive forces
                                 if(LennardJones==1){
                                     forceMagnitude = LennardJonesForce(distance);
