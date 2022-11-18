@@ -22,6 +22,7 @@ typedef struct {
     real D; // Rotational diffusion constant
     real decayTimer; //Time it takes to go back to less persistent state
     int color; //red = 0, green =1 , persistent green = 2
+    int lastContact; //tracks the last opposite particle this one has been in contact with
 } particle ;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Linear algebra ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

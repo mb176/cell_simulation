@@ -80,7 +80,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     clock_t t;
     t = clock();
     
-    
+    printf("%d \n",sizeof(*particles));
     SetParameters(argc, argv);
     SetUpJob();
     //Logs

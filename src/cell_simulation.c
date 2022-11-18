@@ -17,9 +17,8 @@
 //Gunnar's malloc macro, gives error if space can't be assigned (e.g. too big -> NULL returned from OS) and keeps taps on the ammount of space used 
 long long int total_malloced=0LL;
 #define MALLOC(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a)));} }
-//The verbose version prints the space used
+//The verbose version prints the space used so far
 #define MALLOC_VERBOSE(a,n) {if ((a=malloc((n)*sizeof(*a)))==NULL) { fprintf(stderr, "Failed to malloc %i items of size %i (%lli bytes) for variable %s in line %i of %s\n", (int)(n), (int)sizeof(*a), (long long int)((n)*sizeof(*a)), #a, __LINE__, __FILE__); } else { total_malloced+=((long long int)((n)*sizeof(*a))); printf("# Info: %lli bytes malloced for %s, %lli in total so far.\n", (long long int)((n)*sizeof(*a)), #a, total_malloced); } }
-
 
 double getNextParameter(FILE * file, char * parameterName){
     char line[MAX_LINE_LENGTH] = {0};
@@ -381,6 +380,13 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
 
 }
 
+void addContact(int particleIdx, int contactIdx){
+    //Adds the contactIdx to the new particle, if it doesn't already have a contact.
+    if (particles[particleIdx].lastContact == -1){ //No partner already
+        particles[particleIdx].lastContact = contactIdx;
+    }
+}
+
 void ComputeInteractions(){
     //Build Linked list
     VecR cellWidth;
@@ -429,16 +435,12 @@ void ComputeInteractions(){
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
                             if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
-                                //Persistence change
+                                //Add contacts for persistence change
                                 if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
-                                    particles[pIdx1].color = 2;
-                                    particles[pIdx1].D = greenPersistentD;
-                                    particles[pIdx1].decayTimer = tau;
+                                    addContact(pIdx1, pIdx2);
                                 }
                                 else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
-                                    particles[pIdx2].color = 2;
-                                    particles[pIdx2].D = greenPersistentD;
-                                    particles[pIdx2].decayTimer = tau;
+                                    addContact(pIdx2, pIdx1);
                                 }
 
                                 //Direction change (CIL)
@@ -546,6 +548,8 @@ void EnforcePeriodicBoundaries(){
 }
 
 void UpdatePersistence(){
+    VecR deltaR;
+    real distance;
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
         if(particles[particleIdx].color==2){//Is the particle persistent?
             particles[particleIdx].decayTimer -= stepDuration;
@@ -553,6 +557,17 @@ void UpdatePersistence(){
                 particles[particleIdx].color = 1; 
                 particles[particleIdx].D = greenD;
                 particles[particleIdx].decayTimer = 0;
+            }
+        //Did this particles have a heterotypic contact?    
+        } else if (particles[particleIdx].color==1 && particles[particleIdx].lastContact!=-1){
+            VSub(deltaR, particles[particleIdx].r,particles[particles[particleIdx].lastContact].r);
+            VWrapAllTang(deltaR); //Apply periodic boundary condition
+            distance = sqrt(VLenSq(deltaR));
+            if (distance > PERSISTENCE_CHANGE_DISTANCE){ // Is the collision over?
+                particles[particleIdx].lastContact = -1;
+                particles[particleIdx].color = 2;
+                particles[particleIdx].D = greenPersistentD;
+                particles[particleIdx].decayTimer = tau;
             }
         }
     }

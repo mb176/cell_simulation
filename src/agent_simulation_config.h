@@ -6,6 +6,7 @@
 #define LINE_TOL 1e-4; //Error tolerance for the line minimisation in a given direction
 #define TOL 1e-5; //Error tolerance for the overall minimisation
 #define MAX_ITER 8000; //Maximum number of iterations for the GSL minimiser
+#define PERSISTENCE_CHANGE_DISTANCE 1.1 //The distance particles have to reach after a collision before they change distance 
 
 
 //Enable DEBUG for more output/ extra assert cases
