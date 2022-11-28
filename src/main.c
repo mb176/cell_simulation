@@ -9,20 +9,6 @@
 // #include "src/xoshiro_rng.h"
 
 
-
-/*
-In general
-- parallelise with openMP
-- write positions at each step, see where it LJ goes wrong
-- get HPC to work
-- rename/ restructure python files so that they only do one thing at a time
-- unit tests
-- save non-periodic positions
-- do lennart jones with distance2 instead of distance
-- have potential named in logfile
-*/
-
-
 #ifndef LENGTH
 #define LENGTH (100)
 #endif
@@ -59,15 +45,20 @@ real redGreenAdhesionMult;
 uint64_t seed;
 struct xoshiro256ss_state rng;
 particle * particles;
-VecR ** positionMeasurements; 
-real * measurementTimes;
-int ** colorMeasurements;
 FILE * tracksFile;
 FILE * paramFile;
 VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
 int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
 //indices of next particle in the cell, the last entries contain indices to first 
 //particle in that cell
+
+// Extra observables
+real simulationTime; //So that any function can access the current time of the simulation
+#ifdef MEASURE_COLLISION_ANGLE
+real collisionAngle=0;
+int nCollisions=0;
+real collisionDuration=0; 
+#endif //MEASURE_COLLISION_ANGLE
 
 int main(int argc, char **argv){
     
@@ -80,7 +71,6 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     clock_t t;
     t = clock();
     
-    printf("%d \n",sizeof(*particles));
     SetParameters(argc, argv);
     SetUpJob();
     //Logs
@@ -98,6 +88,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     
     
     for(int stepIdx = 0; stepIdx <= stepLimit; stepIdx++){
+        simulationTime = stepIdx*stepDuration;
         //Iterate simulation, save positions at certain step indices
         SingleStep(stepIdx);
 
@@ -110,11 +101,18 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
         }
     }
 
+
     //Simulation duration
     t = clock() - t;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("\nSimulation ended after %f seconds \n",time_taken);
     fprintf(paramFile,"\nSimulation ended after %f seconds \n",time_taken);
+
+    #ifdef MEASURE_COLLISION_ANGLE
+    fprintf(paramFile, "Average angle after collision event (d = %f): %f \n", PERSISTENCE_CHANGE_DISTANCE, collisionAngle/nCollisions);
+    fprintf(paramFile, "Average collision duration: %f \n", collisionDuration/nCollisions);
+    fprintf(paramFile, "Number of collisions: %d \n", nCollisions);
+    #endif 
 
     cleanup(); 
 }

@@ -286,12 +286,14 @@ void InitialiseColor(){
         particles[particleIdx].D = greenD;
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 1;
+        particles[particleIdx].lastContact = -1;
     }
     //Red particles
     for(int particleIdx = nGreenParticles; particleIdx < nGreenParticles + nRedParticles; particleIdx++){
         particles[particleIdx].D = redD;
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 0;
+        particles[particleIdx].lastContact = -1;
     }
 };
 
@@ -384,6 +386,9 @@ void addContact(int particleIdx, int contactIdx){
     //Adds the contactIdx to the new particle, if it doesn't already have a contact.
     if (particles[particleIdx].lastContact == -1){ //No partner already
         particles[particleIdx].lastContact = contactIdx;
+        #ifdef MEASURE_COLLISION_ANGLE
+        particles[particleIdx].collisionTime = simulationTime;
+        #endif
     }
 }
 
@@ -563,11 +568,21 @@ void UpdatePersistence(){
             VSub(deltaR, particles[particleIdx].r,particles[particles[particleIdx].lastContact].r);
             VWrapAllTang(deltaR); //Apply periodic boundary condition
             distance = sqrt(VLenSq(deltaR));
-            if (distance > PERSISTENCE_CHANGE_DISTANCE){ // Is the collision over?
+            if (distance > PERSISTENCE_CHANGE_DISTANCE){ // Is the collision event over?
+                #ifdef MEASURE_COLLISION_ANGLE
+                //Print the angle at which the particles went persistent
+                real angle = particles[particleIdx].theta - particles[particles[particleIdx].lastContact].theta;
+                while(angle > M_PI){angle -=2*M_PI;}
+                while(angle < -M_PI){angle += 2*M_PI;}
+                collisionAngle += fabs(angle*360/2/M_PI);
+                collisionDuration +=(simulationTime-particles[particleIdx].collisionTime);
+                nCollisions += 1;
+                #endif //MEASURE_COLLISION_ANGLE
                 particles[particleIdx].lastContact = -1;
                 particles[particleIdx].color = 2;
                 particles[particleIdx].D = greenPersistentD;
                 particles[particleIdx].decayTimer = tau;
+                
             }
         }
     }

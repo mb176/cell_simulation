@@ -28,6 +28,7 @@ src/CMakeFiles/agent_simulation.dir/main.c.o: \
  /usr/include/string.h /usr/include/strings.h \
  /home/marius/PhD/CellMotility/agent_simulation/src/global.h \
  /home/marius/PhD/CellMotility/agent_simulation/src/base_types2D.h \
+ /home/marius/PhD/CellMotility/agent_simulation/src/agent_simulation_config.h \
  /home/marius/PhD/CellMotility/agent_simulation/src/cell_simulation.h \
  /usr/include/stdlib.h /usr/include/bits/waitflags.h \
  /usr/include/bits/waitstatus.h /usr/include/sys/types.h \
@@ -95,5 +96,4 @@ src/CMakeFiles/agent_simulation.dir/main.c.o: \
  /usr/include/gsl/gsl_matrix_ushort.h /usr/include/gsl/gsl_matrix_short.h \
  /usr/include/gsl/gsl_matrix_uchar.h /usr/include/gsl/gsl_matrix_char.h \
  /usr/include/gsl/gsl_min.h \
- /home/marius/PhD/CellMotility/agent_simulation/src/xoshiro_rng.h \
- /home/marius/PhD/CellMotility/agent_simulation/src/agent_simulation_config.h
+ /home/marius/PhD/CellMotility/agent_simulation/src/xoshiro_rng.h

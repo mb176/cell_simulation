@@ -4,7 +4,7 @@
 #define MAX_LINE_LENGTH 200
 #define MAX_STRING_LENGTH 50
 #include "base_types2D.h"
-
+#include "agent_simulation_config.h"
 
 //Simulation Parameters
 extern int stepLimit;
@@ -33,15 +33,20 @@ extern real redGreenAdhesionMult;
 extern uint64_t seed;
 extern struct xoshiro256ss_state rng;
 extern particle * particles; //First half is green, second half red
-extern VecR ** positionMeasurements; 
-extern real * measurementTimes;
-extern int ** colorMeasurements;
 extern FILE * tracksFile;
 extern FILE * paramFile;
 extern VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
 extern int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
 //indices of next particle in the cell, the last entries contain indices to first 
 //particle in that cell
+
+// Extra observables
+extern real simulationTime; //So that any function can access the current time of the simulation
+#ifdef MEASURE_COLLISION_ANGLE
+extern real collisionAngle;
+extern int nCollisions;
+extern real collisionDuration;
+#endif //MEASURE_COLLISION_ANGLE
 
 
 #endif

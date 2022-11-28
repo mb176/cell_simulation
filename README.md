@@ -94,3 +94,8 @@ Finally there are some hidden parameters, which are determined in agent_simulati
 - When running the code will append your parameter file, first adding additional parameters that are chosen at run run time and then adding a log of the computation. You can also have your error messages redirected there.
 
 - About the parameter file: It cannot contain empty lines, and there has to be exactly one white space between : and the value. The maximum line length is 200 characters, and each variable can have at most 50 characters. The ordering matters and has to match the one used by SetParameters().
+
+#To Do
+-submit_batch.sh running over thrid varibale and creating directories that are missing
+-rsync more folder at once
+-execute romately via ssh

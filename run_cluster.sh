@@ -24,12 +24,12 @@ then
 else
     for i in $(seq $nReps)
     do
-        ./build/src/agent_simulation $parameterFile "_tracks_${i}.csv" >>"${parameterFile}"
+        ./build/src/agent_simulation $parameterFile "_tracks_${i}.csv" 2>>"${parameterFile}"
     done
 fi
 
 # Ananlyse tracks
-python3 ../analysis/write_mixing_index_sim.py $parameterFile
+# python3 ../analysis/write_mixing_index_sim.py $parameterFile
 python3 ../analysis/write_clustering_sim.py $parameterFile
 
 

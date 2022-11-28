@@ -1,6 +1,6 @@
 #ifndef base_types
 #define base_types
-
+#include "agent_simulation_config.h"
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Data types ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 typedef double real;
@@ -23,6 +23,9 @@ typedef struct {
     real decayTimer; //Time it takes to go back to less persistent state
     int color; //red = 0, green =1 , persistent green = 2
     int lastContact; //tracks the last opposite particle this one has been in contact with
+    #ifdef MEASURE_COLLISION_ANGLE
+    real collisionTime;
+    #endif
 } particle ;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Linear algebra ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
