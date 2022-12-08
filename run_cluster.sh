@@ -29,7 +29,7 @@ else
 fi
 
 # Ananlyse tracks
-# python3 ../analysis/write_mixing_index_sim.py $parameterFile
+python3 ../analysis/write_mixing_index_sim.py $parameterFile
 python3 ../analysis/write_clustering_sim.py $parameterFile
 
 
