@@ -9,10 +9,10 @@
 
 
 //Enable DEBUG for more output/ extra assert cases
-// #define DEBUG
+#define DEBUG
 
-//The distance particles have to reach after a collision before they change distance 
-#define PERSISTENCE_CHANGE_DISTANCE 1.2
+// Time after which CIL triggers
+#define CIL_DELAY 0.02
 
 
 // Measure angle between cells after heterotypic collision

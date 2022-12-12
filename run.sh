@@ -7,7 +7,7 @@ set -e
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_persistence/test/areaFraction_0.4_Pe_40"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_persistence/test/test"
 fi
 
 #Genrate make file using cmake

@@ -23,9 +23,7 @@ typedef struct {
     real decayTimer; //Time it takes to go back to less persistent state
     int color; //red = 0, green =1 , persistent green = 2
     int lastContact; //tracks the last opposite particle this one has been in contact with
-    #ifdef MEASURE_COLLISION_ANGLE
-    real collisionTime;
-    #endif
+    real contactTime; //Tracks the time of collision
 } particle ;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Linear algebra ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

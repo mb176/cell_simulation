@@ -287,6 +287,7 @@ void InitialiseColor(){
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 1;
         particles[particleIdx].lastContact = -1;
+        particles[particleIdx].contactTime = -1;
     }
     //Red particles
     for(int particleIdx = nGreenParticles; particleIdx < nGreenParticles + nRedParticles; particleIdx++){
@@ -294,6 +295,7 @@ void InitialiseColor(){
         particles[particleIdx].decayTimer = 0;
         particles[particleIdx].color = 0;
         particles[particleIdx].lastContact = -1;
+        particles[particleIdx].contactTime = -1;
     }
 };
 
@@ -386,9 +388,8 @@ void addContact(int particleIdx, int contactIdx){
     //Adds the contactIdx to the new particle, if it doesn't already have a contact.
     if (particles[particleIdx].lastContact == -1){ //No partner already
         particles[particleIdx].lastContact = contactIdx;
-        #ifdef MEASURE_COLLISION_ANGLE
-        particles[particleIdx].collisionTime = simulationTime;
-        #endif
+        particles[particleIdx].decayTimer = CIL_DELAY;
+        particles[particleIdx].contactTime = simulationTime;
     }
 }
 
@@ -417,7 +418,7 @@ void ComputeInteractions(){
 
     //Compute interactions:
     VecR deltaR;
-    real distance, forceMagnitude;
+    real distance, forceMagnitude, springForce;
     VecI cellIdx1, cellIdx2;
     int linearCellIdx1, linearCellIdx2;
     VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
@@ -440,18 +441,9 @@ void ComputeInteractions(){
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
                             if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
-                                //Add contacts for persistence change
-                                if(particles[pIdx1].color==1 && particles[pIdx2].color==0){
-                                    addContact(pIdx1, pIdx2);
-                                }
-                                else if (particles[pIdx1].color==0 && particles[pIdx2].color==1){
-                                    addContact(pIdx2, pIdx1);
-                                }
-
-                                //Direction change (CIL)
-                                if(turnAround>0){
-                                    changeDirection(pIdx1, pIdx2, deltaR);
-                                }
+                                //Add contacts 
+                                addContact(pIdx1, pIdx2);
+                                addContact(pIdx2, pIdx1);
 
                                 //Repulsive forces
                                 if(LennardJones==1){
@@ -556,34 +548,55 @@ void UpdatePersistence(){
     VecR deltaR;
     real distance;
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
-        if(particles[particleIdx].color==2){//Is the particle persistent?
+        // Forward decay timer
+        if (particles[particleIdx].decayTimer>0){
             particles[particleIdx].decayTimer -= stepDuration;
+        }
+        // Update persistence
+        if(particles[particleIdx].color==2){
             if(particles[particleIdx].decayTimer <= 0){
                 particles[particleIdx].color = 1; 
                 particles[particleIdx].D = greenD;
                 particles[particleIdx].decayTimer = 0;
             }
-        //Did this particles have a heterotypic contact?    
-        } else if (particles[particleIdx].color==1 && particles[particleIdx].lastContact!=-1){
-            VSub(deltaR, particles[particleIdx].r,particles[particles[particleIdx].lastContact].r);
-            VWrapAllTang(deltaR); //Apply periodic boundary condition
-            distance = sqrt(VLenSq(deltaR));
-            if (distance > PERSISTENCE_CHANGE_DISTANCE){ // Is the collision event over?
-                #ifdef MEASURE_COLLISION_ANGLE
-                //Print the angle at which the particles went persistent
-                real angle = particles[particleIdx].theta - particles[particles[particleIdx].lastContact].theta;
-                while(angle > M_PI){angle -=2*M_PI;}
-                while(angle < -M_PI){angle += 2*M_PI;}
-                collisionAngle += fabs(angle*360/2/M_PI);
-                collisionDuration +=(simulationTime-particles[particleIdx].collisionTime);
-                nCollisions += 1;
-                #endif //MEASURE_COLLISION_ANGLE
-                particles[particleIdx].lastContact = -1;
-                particles[particleIdx].color = 2;
+        }
+        // Have any contacts matured?
+        if ((particles[particleIdx].lastContact!=-1) 
+            && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
+            int contactIdx = particles[particleIdx].lastContact;
+            
+            // Perform CIL
+            VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
+            VWrapAllTang(deltaR);
+            changeDirection(particleIdx,contactIdx,deltaR);
+            
+            // Change persistence
+            if (particles[particleIdx].color == 1){
+                particles[particleIdx].color = 2; 
                 particles[particleIdx].D = greenPersistentD;
                 particles[particleIdx].decayTimer = tau;
-                
             }
+            if (particles[contactIdx].color == 1){
+                particles[contactIdx].color = 2; 
+                particles[contactIdx].D = greenPersistentD;
+                particles[contactIdx].decayTimer = tau;
+            }
+            
+            #ifdef MEASURE_COLLISION_ANGLE
+            //Print the angle at which the particles went persistent
+            real angle = particles[particleIdx].theta - particles[particles[particleIdx].lastContact].theta;
+            while(angle > M_PI){angle -=2*M_PI;}
+            while(angle < -M_PI){angle += 2*M_PI;}
+            collisionAngle += fabs(angle*360/2/M_PI);
+            collisionDuration +=(simulationTime-particles[particleIdx].contactTime);
+            nCollisions += 1;
+            #endif //MEASURE_COLLISION_ANGLE
+
+            // Clean up
+            particles[particleIdx].lastContact = -1;
+            particles[particleIdx].contactTime = -1;
+            particles[contactIdx].lastContact = -1;
+            particles[contactIdx].contactTime = -1;
         }
     }
 }

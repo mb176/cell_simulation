@@ -107,9 +107,11 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("\nSimulation ended after %f seconds \n",time_taken);
     fprintf(paramFile,"\nSimulation ended after %f seconds \n",time_taken);
+    real cilDelay = CIL_DELAY;
+    fprintf(paramFile, "CIL delay time: %f \n", cilDelay);
 
     #ifdef MEASURE_COLLISION_ANGLE
-    fprintf(paramFile, "Average angle after collision event (d = %f): %f \n", PERSISTENCE_CHANGE_DISTANCE, collisionAngle/nCollisions);
+    fprintf(paramFile, "Average angle after collision event: %f \n", collisionAngle/nCollisions);
     fprintf(paramFile, "Average collision duration: %f \n", collisionDuration/nCollisions);
     fprintf(paramFile, "Number of collisions: %d \n", nCollisions);
     #endif 
