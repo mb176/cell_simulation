@@ -28,6 +28,7 @@ extern real turnAround; // Bool that flags wether the particles move away from e
 extern real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
 extern real greenGreenAdhesionMutl;
 extern real redGreenAdhesionMult;
+extern real CIL_delay; // the delay after a contact until CIL kicks in. Also limits the time of the pairing/ harmonic spring
 
 // Data structures
 extern uint64_t seed;

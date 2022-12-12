@@ -10,13 +10,15 @@
 
 //Enable DEBUG for more output/ extra assert cases
 #define DEBUG
-
-// Time after which CIL triggers
-#define CIL_DELAY 0.02
-
+#define MAX_STEP_DISPLACEMENT 1.0 //In debug mode we assert that a particle cannot travel further than that in a single step 
 
 // Measure angle between cells after heterotypic collision
 #define MEASURE_COLLISION_ANGLE
 
+// If defined will cause particles to be attached by a harmonic spring to their last contact
+#define STICKY_CONTACTS 
+
+
+
+
 // #define turnAroundVariation M_PI/2; //if defined the angle after turnAround will be randomised by a uniformly drawn angle with maximal value turnAroundVariation in radians
-#define MAX_STEP_DISPLACEMENT 1.0 //In debug mode we assert that a particle cannot travel further than that in a single step 

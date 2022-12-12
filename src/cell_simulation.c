@@ -86,6 +86,7 @@ void SetParameters(int argc, char** argv){
     assert(stepLimit>=20);
 
     //Initialise secondary parameters
+    CIL_delay = tau/2; //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
     nParticles = nGreenParticles + nRedParticles;
     //Setup Square area to fit the area fraction; each particle covers area of size pi*0.5^2 = 0.785398
     real length = sqrt(nParticles*0.785398/areaFraction);
@@ -384,12 +385,13 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
 
 }
 
-void addContact(int particleIdx, int contactIdx){
+void addContact(int pIdx1, int pIdx2){
     //Adds the contactIdx to the new particle, if it doesn't already have a contact.
-    if (particles[particleIdx].lastContact == -1){ //No partner already
-        particles[particleIdx].lastContact = contactIdx;
-        particles[particleIdx].decayTimer = CIL_DELAY;
-        particles[particleIdx].contactTime = simulationTime;
+    if((particles[pIdx1].lastContact == -1)&&(particles[pIdx2].lastContact==-1)){ //No partner already
+        particles[pIdx1].lastContact = pIdx2;
+        particles[pIdx1].contactTime = simulationTime;
+        particles[pIdx2].lastContact = pIdx1;
+        particles[pIdx2].contactTime = simulationTime;
     }
 }
 
@@ -441,9 +443,8 @@ void ComputeInteractions(){
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
                             if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
-                                //Add contacts 
+                                //Add contacts index to both particles
                                 addContact(pIdx1, pIdx2);
-                                addContact(pIdx2, pIdx1);
 
                                 //Repulsive forces
                                 if(LennardJones==1){
@@ -482,6 +483,26 @@ void ComputeInteractions(){
             }
         }
     }
+    #ifdef STICKY_CONTACTS
+    // Harmonic springs between particle pairs
+    // Note: This needs to be done outside the cellIdx loop, because otherwise the springs "snap" as 
+    // when the particles seperate further than the cell radius 
+    for(int pIdx=0; pIdx < nParticles; pIdx++){ 
+        if(particles[pIdx].lastContact!=-1){
+            VSub(deltaR, particles[pIdx].r,particles[particles[pIdx].lastContact].r);
+            VWrapAllTang(deltaR); //Apply periodic boundary condition
+            distance = sqrt(VLenSq(deltaR));
+            springForce = -5*k/distance*(distance-1); //Use stiff spring with 5*k
+            VVSAdd(particles[pIdx].force,springForce,deltaR);
+            #ifdef DEBUG
+            int contactIdx = particles[pIdx].lastContact;
+            assert(particles[contactIdx].lastContact==pIdx); //Check that contacts are reciprocal
+            #endif
+            
+        }
+    }
+    #endif
+    
 }
 
 void EulerMaruyamaR(){
@@ -562,7 +583,7 @@ void UpdatePersistence(){
         }
         // Have any contacts matured?
         if ((particles[particleIdx].lastContact!=-1) 
-            && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
+            && (simulationTime-particles[particleIdx].contactTime>CIL_delay)){
             int contactIdx = particles[particleIdx].lastContact;
             
             // Perform CIL
@@ -571,12 +592,12 @@ void UpdatePersistence(){
             changeDirection(particleIdx,contactIdx,deltaR);
             
             // Change persistence
-            if (particles[particleIdx].color == 1){
+            if (particles[particleIdx].color == 1 && particles[contactIdx].color==0){
                 particles[particleIdx].color = 2; 
                 particles[particleIdx].D = greenPersistentD;
                 particles[particleIdx].decayTimer = tau;
             }
-            if (particles[contactIdx].color == 1){
+            if (particles[contactIdx].color == 1 && particles[particleIdx].color==0){
                 particles[contactIdx].color = 2; 
                 particles[contactIdx].D = greenPersistentD;
                 particles[contactIdx].decayTimer = tau;
