@@ -9,14 +9,14 @@
 
 
 //Enable DEBUG for more output/ extra assert cases
-#define DEBUG
+// #define DEBUG
 #define MAX_STEP_DISPLACEMENT 1.0 //In debug mode we assert that a particle cannot travel further than that in a single step 
 
 // Measure angle between cells after heterotypic collision
 #define MEASURE_COLLISION_ANGLE
 
 // If defined will cause particles to be attached by a harmonic spring to their last contact
-#define STICKY_CONTACTS 
+// #define STICKY_CONTACTS 
 
 
 

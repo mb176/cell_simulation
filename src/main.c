@@ -109,6 +109,9 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("\nSimulation ended after %f seconds \n",time_taken);
     fprintf(paramFile,"\nSimulation ended after %f seconds \n",time_taken);
+    #ifdef STICKY_CONTACTS
+    fprintf(paramFile, "Pairs are connected by harmonic springs; ");
+    #endif
     fprintf(paramFile, "CIL delay time: %f \n", CIL_delay);
 
     #ifdef MEASURE_COLLISION_ANGLE

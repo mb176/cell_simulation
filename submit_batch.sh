@@ -10,21 +10,21 @@ measurementInterval=1e0
 nGreenParticles=2000
 nRedParticles=2000
 areaFractionList=(0.2 0.4 0.6)
-redD=20
-greenD=20
+redD=9
+greenD=9
 greenPersistentD=1
 k=50
 tau=0.02
-PeList=(20 40 80 160)
-potentialRange=1 #1.10868
+PeList=(5 10 20 40 80 120)
+potentialRange=1.10868
 LennardJones=1
 turnAround=1
-redRedAdhesionMult=0
-greenGreenAdhesionMutl=0
-redGreenAdhesionMult=0
+redRedAdhesionMult=0.5
+greenGreenAdhesionMutl=0.5
+redGreenAdhesionMult=0.5
 
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/persistence_20_1/tau_0.02"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/free_pairs/persistence_9_1/adhesion_tau_0.1"
 
 #Genrate make file using cmake
 cmake . -B build

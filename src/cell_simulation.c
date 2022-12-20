@@ -582,8 +582,7 @@ void UpdatePersistence(){
             }
         }
         // Have any contacts matured?
-        if ((particles[particleIdx].lastContact!=-1) 
-            && (simulationTime-particles[particleIdx].contactTime>CIL_delay)){
+        if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_delay)){
             int contactIdx = particles[particleIdx].lastContact;
             
             // Perform CIL
