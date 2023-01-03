@@ -39,7 +39,6 @@ real turnAround; // Number that flags wether the particles move away from each o
 real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
 real greenGreenAdhesionMutl;
 real redGreenAdhesionMult;
-real CIL_delay; // the delay after a contact until CIL kicks in. Also limits the time of the pairing/ harmonic spring
 
 
 
@@ -48,6 +47,9 @@ uint64_t seed;
 struct xoshiro256ss_state rng;
 particle * particles;
 FILE * tracksFile;
+#ifdef TRACK_VELOCITIES
+FILE * velocityTracksFile;
+#endif
 FILE * paramFile;
 VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
 int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
@@ -112,7 +114,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     #ifdef STICKY_CONTACTS
     fprintf(paramFile, "Pairs are connected by harmonic springs; ");
     #endif
-    fprintf(paramFile, "CIL delay time: %f \n", CIL_delay);
+    fprintf(paramFile, "CIL delay time: %f \n", CIL_DELAY);
 
     #ifdef MEASURE_COLLISION_ANGLE
     fprintf(paramFile, "Average angle after collision event: %f \n", collisionAngle/nCollisions);

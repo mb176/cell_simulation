@@ -35,7 +35,7 @@ fi
 #Analysis
 # echo "Plotting the tracks..."
 # python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
-python3 ../analysis/animation_sim.py $parameterFile
+# python3 ../analysis/animation_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_simulation.py $parameterFi
 # python3 /home/marius/PhD/CellMotility/analysis/write_mixing_index_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/write_clustering_sim.py $parameterFile

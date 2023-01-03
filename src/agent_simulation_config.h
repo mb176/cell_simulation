@@ -9,14 +9,21 @@
 
 
 //Enable DEBUG for more output/ extra assert cases
-// #define DEBUG
+#define DEBUG
 #define MAX_STEP_DISPLACEMENT 1.0 //In debug mode we assert that a particle cannot travel further than that in a single step 
 
 // Measure angle between cells after heterotypic collision
 #define MEASURE_COLLISION_ANGLE
 
-// If defined will cause particles to be attached by a harmonic spring to their last contact
+// Write down the particle orientations at each measurement step
+#define TRACK_VELOCITIES
+
+//How long is CIL delayed after contact? (-1) corresponds to no contact delay
+#define CIL_DELAY -1 //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
+
+// Should particles be connected via harmonic springs while CIL is delayed?
 // #define STICKY_CONTACTS 
+
 
 
 

@@ -28,14 +28,16 @@ extern real turnAround; // Bool that flags wether the particles move away from e
 extern real redRedAdhesionMult; // Multiplies the adhesive component of the force between these particle types
 extern real greenGreenAdhesionMutl;
 extern real redGreenAdhesionMult;
-extern real CIL_delay; // the delay after a contact until CIL kicks in. Also limits the time of the pairing/ harmonic spring
 
 // Data structures
 extern uint64_t seed;
 extern struct xoshiro256ss_state rng;
 extern particle * particles; //First half is green, second half red
-extern FILE * tracksFile;
 extern FILE * paramFile;
+extern FILE * tracksFile;
+#ifdef TRACK_VELOCITIES
+extern FILE * velocityTracksFile;
+#endif
 extern VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
 extern int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
 //indices of next particle in the cell, the last entries contain indices to first 
@@ -48,6 +50,7 @@ extern real collisionAngle;
 extern int nCollisions;
 extern real collisionDuration;
 #endif //MEASURE_COLLISION_ANGLE
+
 
 
 #endif

@@ -35,13 +35,13 @@ double getNextParameter(FILE * file, char * parameterName){
 }
 
 void SetParameters(int argc, char** argv){
-    char * PATH;
+    char PATH[100];
     char * trackFileSuffix;
     if(argc==2){ //Tracks file name unspecified
-        PATH = argv[1];
+        strcpy(PATH,argv[1]);
         trackFileSuffix = "_tracks.csv";
     } else if (argc==3){ //Tracks file name specified
-        PATH = argv[1];
+        strcpy(PATH,argv[1]);
         trackFileSuffix = argv[2];
     } else {
         assert(false); // main needs at least one and at most two command line inputs
@@ -49,7 +49,15 @@ void SetParameters(int argc, char** argv){
     
     // Files
     paramFile = fopen(PATH,"r+");
-    tracksFile = fopen(strcat(PATH,trackFileSuffix),"w");
+    char tmp[100];
+    strcpy(tmp, PATH);
+    tracksFile = fopen(strcat(tmp,trackFileSuffix),"w");
+
+    #ifdef TRACK_VELOCITIES
+    strcat(PATH, "_velocities");
+    velocityTracksFile = fopen(strcat(PATH,trackFileSuffix),"w");
+    //for some reason the strcat(...) in the previous line changes trackFileSuffix to "velocities". Why???
+    #endif
 
     printf("Parameter file: "); printf(PATH); printf("\n");
     printf("Initialise paramters:\n");
@@ -86,7 +94,6 @@ void SetParameters(int argc, char** argv){
     assert(stepLimit>=20);
 
     //Initialise secondary parameters
-    CIL_delay = tau/2; //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
     nParticles = nGreenParticles + nRedParticles;
     //Setup Square area to fit the area fraction; each particle covers area of size pi*0.5^2 = 0.785398
     real length = sqrt(nParticles*0.785398/areaFraction);
@@ -332,12 +339,32 @@ void MeasurePositions(real time){
     fprintf(tracksFile,"\n");
 };
 
+void MeasureVelocities(real time){
+    //Times
+    fprintf(velocityTracksFile, "%f", time);
+    real angle;
+    for(int particleIdx = 0; particleIdx<nParticles; particleIdx++){
+        //Print the angle at which the particles went persistent
+        angle = particles[particleIdx].theta;
+        while(angle > M_PI){angle -=2*M_PI;}
+        while(angle < -M_PI){angle += 2*M_PI;}
+        //Print positions
+
+        fprintf(velocityTracksFile,", %f", angle);
+    }
+    fprintf(velocityTracksFile,"\n");
+};
+
 void SetUpJob(){
     AllocArrays();
     InitialisePositions();
     InitialiseColor();
     InitialiseAngles();
     MeasurePositions(0);
+    #ifdef TRACK_VELOCITIES
+    MeasureVelocities(0);
+    #endif
+    
 }
 
 //Begin: Support Functions for Single Step
@@ -582,7 +609,7 @@ void UpdatePersistence(){
             }
         }
         // Have any contacts matured?
-        if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_delay)){
+        if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
             int contactIdx = particles[particleIdx].lastContact;
             
             // Perform CIL
@@ -631,8 +658,14 @@ void SingleStep (int stepIdx){
     int measurementSteps = round(measurementInterval/stepDuration); 
     if(((stepIdx > skipSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
         MeasurePositions(stepIdx*stepDuration);
+        #ifdef TRACK_VELOCITIES
+        MeasureVelocities(stepIdx*stepDuration);
+        #endif
     } else if (stepIdx==(stepLimit-1)){ //Save final step (initial position is measured by SetUpJob()
         MeasurePositions(stepIdx*stepDuration);
+        #ifdef TRACK_VELOCITIES
+        MeasureVelocities(stepIdx*stepDuration);
+        #endif
     }
 }
 
