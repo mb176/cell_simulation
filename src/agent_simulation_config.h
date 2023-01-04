@@ -24,7 +24,10 @@
 // Should particles be connected via harmonic springs while CIL is delayed?
 // #define STICKY_CONTACTS 
 
-
+// Maximum number of neighbourshood pairs that can be stored; Simulation crashes if the value is exceeded 
+#define MAX_NEIGHBOUR_PAIRS 10*nParticles
+// Extends the size of computational cells beyond the interaction radius. When particle displacement exceeds this value, the neighbourhood list needs updating
+#define CELL_SIZE_EXTENSION 1
 
 
 

@@ -42,7 +42,9 @@ extern VecI cells; //Number of cells dividing the space in each coordinate for i
 extern int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
 //indices of next particle in the cell, the last entries contain indices to first 
 //particle in that cell
-
+extern int * neighbourList; // List of int pairs that denote the to particles that are neighbours
+extern int updateNeighbourList; //Boolean, when set it triggers a recalculation of the neighbour list.
+extern int nNeighbourPairs; // Current length of the neighbour list
 // Extra observables
 extern real simulationTime; //So that any function can access the current time of the simulation
 #ifdef MEASURE_COLLISION_ANGLE
@@ -50,7 +52,7 @@ extern real collisionAngle;
 extern int nCollisions;
 extern real collisionDuration;
 #endif //MEASURE_COLLISION_ANGLE
-
+extern real maxTotalDisplacement; //Keeps track of the maximum any particle has moved, triggers updates of neighbour list
 
 
 #endif

@@ -100,8 +100,8 @@ void SetParameters(int argc, char** argv){
     printf("length=%f \n",length);
     region = (VecR) {.x = length,
                      .y = length};  //Size of the simulation region
-    cells.x = region.x/(potentialRange); //Smallest cells that are larger than interaction range
-    cells.y = region.y/(potentialRange);
+    cells.x = region.x/(potentialRange+CELL_SIZE_EXTENSION); //Smallest cells that are larger than interaction range
+    cells.y = region.y/(potentialRange+CELL_SIZE_EXTENSION);
 
     nMeasurements = round((stepLimit-skipSteps)*(stepDuration/measurementInterval)) + 1; //+1 one because we do the first and the last step 
     seed = SEED;//time(NULL);
@@ -124,7 +124,8 @@ void AllocArrays(){
     //Particle array
     MALLOC(particles, nParticles); //particles = (particle *) malloc(nParticles*(sizeof(particle)));
     //Linked list for cells
-    MALLOC_VERBOSE(cellList, (nParticles + VProd(cells)));//cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
+    MALLOC(cellList, (nParticles + VProd(cells)));//cellList = (int *) malloc((nParticles + VProd(cells))*sizeof(int));
+    MALLOC_VERBOSE(neighbourList, 2*MAX_NEIGHBOUR_PAIRS);
 };
 
 //Potential Energy to be minimised
@@ -355,6 +356,63 @@ void MeasureVelocities(real time){
     fprintf(velocityTracksFile,"\n");
 };
 
+void BuildNeighbourList(){
+    VecR cellWidth;
+    VecI cellIdx;
+    int linearCellIdx;
+    VDiv(cellWidth, region, cells);
+
+     //Write linked list
+    for(int n = nParticles; n < nParticles + VProd(cells); n++) cellList[n] = -1; //Reset list values
+    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
+        VDiv(cellIdx,particles[particleIdx].r,cellWidth);
+        linearCellIdx = VLinear(cellIdx, cells) + nParticles;//Linearise matrix index to vector index
+        cellList[particleIdx] = cellList[linearCellIdx];
+        cellList[linearCellIdx] = particleIdx;
+        // Explaination: After this every cellIndex (cellList[nParticle:nParticle+nCells])
+        // links to the first particle in that cell, that then links to the next particle,
+        // until the particle chain finishes with -1
+    }
+
+    //Create Neighbourhood list
+    VecR deltaR;
+    real distance, forceMagnitude, springForce;
+    VecI cellIdx1, cellIdx2;
+    int linearCellIdx1, linearCellIdx2;
+    VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
+    int nOffsets = 5;
+    nNeighbourPairs = 0;
+    //Go through all cells
+    for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
+        for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
+            VSet(cellIdx1,cellXIdx,cellYIdx);
+            //Go through this cell and its neighbouring cells
+            for(int offsetIdx = 0; offsetIdx < nOffsets; offsetIdx++){
+                VSAdd(cellIdx2, cellIdx1, 1, offset[offsetIdx]);
+                VCellWrapAll(cellIdx2); //Periodic boundaries for cells
+                linearCellIdx1 = VLinear(cellIdx1, cells) + nParticles;
+                linearCellIdx2 = VLinear(cellIdx2, cells) + nParticles;
+                //Go through all particles in the cells
+                for(int pIdx1 = cellList[linearCellIdx1]; pIdx1 >=0; pIdx1 = cellList[pIdx1]){
+                    for(int pIdx2 = cellList[linearCellIdx2]; pIdx2 >=0; pIdx2 = cellList[pIdx2]){
+                        if(linearCellIdx1!=linearCellIdx2 || pIdx2 < pIdx1){ //Avoid double counting in same cell
+                            VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
+                            VWrapAllTang(deltaR); //Apply periodic boundary condition
+                            distance = sqrt(VLenSq(deltaR));
+                            if(distance < cellWidth.x){
+                                assert(nNeighbourPairs <= MAX_NEIGHBOUR_PAIRS); // We can't exceed the size of the neighbour list
+                                neighbourList[2*nNeighbourPairs] = pIdx1;
+                                neighbourList[2*nNeighbourPairs+1] = pIdx2;
+                                nNeighbourPairs++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 void SetUpJob(){
     AllocArrays();
     InitialisePositions();
@@ -448,68 +506,53 @@ void ComputeInteractions(){
     //Compute interactions:
     VecR deltaR;
     real distance, forceMagnitude, springForce;
-    VecI cellIdx1, cellIdx2;
-    int linearCellIdx1, linearCellIdx2;
-    VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
-    int nOffsets = 5;
-    //Go through all cells
-    for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
-        for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
-            VSet(cellIdx1,cellXIdx,cellYIdx);
-            //Go through this cell and its neighbouring cells
-            for(int offsetIdx = 0; offsetIdx < nOffsets; offsetIdx++){
-                VSAdd(cellIdx2, cellIdx1, 1, offset[offsetIdx]);
-                VCellWrapAll(cellIdx2); //Periodic boundaries for cells
-                linearCellIdx1 = VLinear(cellIdx1, cells) + nParticles;
-                linearCellIdx2 = VLinear(cellIdx2, cells) + nParticles;
-                //Go through all particles in the cells
-                for(int pIdx1 = cellList[linearCellIdx1]; pIdx1 >=0; pIdx1 = cellList[pIdx1]){
-                    for(int pIdx2 = cellList[linearCellIdx2]; pIdx2 >=0; pIdx2 = cellList[pIdx2]){
-                        if(linearCellIdx1!=linearCellIdx2 || pIdx2 < pIdx1){ //Avoid double counting in same cell
-                            VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
-                            VWrapAllTang(deltaR); //Apply periodic boundary condition
-                            distance = sqrt(VLenSq(deltaR));
-                            if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
-                                //Add contacts index to both particles
-                                addContact(pIdx1, pIdx2);
+    int pairIdx, pIdx1, pIdx2;
+    for(pairIdx = 0; pairIdx < nNeighbourPairs; pairIdx++){
+        pIdx1 = neighbourList[2*pairIdx];
+        pIdx2 = neighbourList[2*pairIdx+1];
+        VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
+        VWrapAllTang(deltaR); //Apply periodic boundary condition
+        distance = sqrt(VLenSq(deltaR));
+        if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
+            //Add contacts index to both particles if they are of different type
+            if ((particles[pIdx1].color==0 && particles[pIdx2].color!=0) || (particles[pIdx1].color!=0 && particles[pIdx2].color==0)){
+                addContact(pIdx1, pIdx2);
+            }
 
-                                //Repulsive forces
-                                if(LennardJones==1){
-                                    forceMagnitude = LennardJonesForce(distance);
-                                } else {
-                                    forceMagnitude = HarmonicForce(distance);
-                                }
-                                VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
-                                VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
+            //Repulsive forces
+            if(LennardJones==1){
+                forceMagnitude = LennardJonesForce(distance);
+            } else {
+                forceMagnitude = HarmonicForce(distance);
+            }
+            VVSAdd(particles[pIdx1].force,forceMagnitude,deltaR);
+            VVSAdd(particles[pIdx2].force,-forceMagnitude,deltaR);
 
-                            } else if(distance < potentialRange){ //Are particles within attraction range, but not touching?
-                                // Attractive forces
-                                if(LennardJones==1){
-                                    forceMagnitude = LennardJonesForce(distance);
-                                } else {
-                                    forceMagnitude = HarmonicForce(distance);
-                                }
-                                
-                                //Are these two red particles?
-                                if(particles[pIdx1].color==0 && particles[pIdx2].color==0){
-                                    VVSAdd(particles[pIdx1].force,redRedAdhesionMult*forceMagnitude,deltaR);
-                                    VVSAdd(particles[pIdx2].force,-redRedAdhesionMult*forceMagnitude,deltaR);
-                                } //Are these two green particles?
-                                else if((particles[pIdx1].color==1 || particles[pIdx1].color==2) && (particles[pIdx2].color==1 || particles[pIdx2].color==2)){
-                                    VVSAdd(particles[pIdx1].force,greenGreenAdhesionMutl*forceMagnitude,deltaR);
-                                    VVSAdd(particles[pIdx2].force,-greenGreenAdhesionMutl*forceMagnitude,deltaR);
-                                } // There are opposite-color particles
-                                else {
-                                    VVSAdd(particles[pIdx1].force,redGreenAdhesionMult*forceMagnitude,deltaR);
-                                    VVSAdd(particles[pIdx2].force,-redGreenAdhesionMult*forceMagnitude,deltaR);
-                                }
-                            }
-                        }
-                    }
-                }
+        } else if(distance < potentialRange){ //Are particles within attraction range, but not touching?
+            // Attractive forces
+            if(LennardJones==1){
+                forceMagnitude = LennardJonesForce(distance);
+            } else {
+                forceMagnitude = HarmonicForce(distance);
+            }
+            
+            //Are these two red particles?
+            if(particles[pIdx1].color==0 && particles[pIdx2].color==0){
+                VVSAdd(particles[pIdx1].force,redRedAdhesionMult*forceMagnitude,deltaR);
+                VVSAdd(particles[pIdx2].force,-redRedAdhesionMult*forceMagnitude,deltaR);
+            } //Are these two green particles?
+            else if((particles[pIdx1].color==1 || particles[pIdx1].color==2) && (particles[pIdx2].color==1 || particles[pIdx2].color==2)){
+                VVSAdd(particles[pIdx1].force,greenGreenAdhesionMutl*forceMagnitude,deltaR);
+                VVSAdd(particles[pIdx2].force,-greenGreenAdhesionMutl*forceMagnitude,deltaR);
+            } // There are opposite-color particles
+            else {
+                VVSAdd(particles[pIdx1].force,redGreenAdhesionMult*forceMagnitude,deltaR);
+                VVSAdd(particles[pIdx2].force,-redGreenAdhesionMult*forceMagnitude,deltaR);
             }
         }
     }
+                            
+
     #ifdef STICKY_CONTACTS
     // Harmonic springs between particle pairs
     // Note: This needs to be done outside the cellIdx loop, because otherwise the springs "snap" as 
@@ -536,34 +579,44 @@ void EulerMaruyamaR(){
     real rootStepDuration = sqrt(stepDuration); //ToDo: Avoid repeat calls
     real root2 = sqrt(2);
     //Updates the positions r of the particle based on the forces calculated in ComputeInteractions
-    VecR velocity;
+    VecR direction;
+    VecR displacement;
+    real maxDisplacementSq=0;
     double noise[2];
+
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
+        VZero(displacement);
         //Self propulsion
-        velocity.x = cos(particles[particleIdx].theta); //ToDo: Can we get less calls to sin/ cos here?
-        velocity.y = sin(particles[particleIdx].theta); //WARNING: not 3d compatible
-        VVSAdd(particles[particleIdx].r,stepDuration*Pe,velocity);
+        direction.x = cos(particles[particleIdx].theta); //ToDo: Can we get less calls to sin/ cos here?
+        direction.y = sin(particles[particleIdx].theta); //WARNING: not 3d compatible
+        VVSAdd(displacement,stepDuration*Pe,direction);
 
         //Forces
-        VVSAdd(particles[particleIdx].r,stepDuration,particles[particleIdx].force);
+        VVSAdd(displacement,stepDuration,particles[particleIdx].force);
 
         //Noise (ToDo: Vectorise random number generation)
         xoshiro256ss_normal(noise, &rng);
-        particles[particleIdx].r.x += rootStepDuration*root2*noise[0];
-        particles[particleIdx].r.y += rootStepDuration*root2*noise[1];
+        displacement.x += rootStepDuration*root2*noise[0];
+        displacement.y += rootStepDuration*root2*noise[1];
 
-        #ifdef DEBUG
-        double distanceSq = VLenSq(velocity)*stepDuration*stepDuration*Pe*Pe;
-        distanceSq += VLenSq(particles[particleIdx].force)*stepDuration*stepDuration;
-        distanceSq += 2*stepDuration*(noise[0]*noise[0]+noise[1]*noise[1]);
-        if(distanceSq>MAX_STEP_DISPLACEMENT*MAX_STEP_DISPLACEMENT){
-            double max = MAX_STEP_DISPLACEMENT;
-            printf("Error: The displacment of %f was larger the the allowed maximum of %f\n",sqrt(distanceSq),max);
-            fflush(stdout);
-            assert(0);  //Exceeds maximum displacement
-        }
-        #endif
-    }   
+        VVSAdd(particles[particleIdx].r,1,displacement);
+
+        maxDisplacementSq = MAX(maxDisplacementSq, VLenSq(displacement));
+    }
+
+    maxTotalDisplacement += sqrt(maxDisplacementSq);
+    if(maxTotalDisplacement > 0.5 * CELL_SIZE_EXTENSION){// Can a new particle have moved within interaction distance?
+        updateNeighbourList = 1;
+    }
+    
+    #ifdef DEBUG
+    if(maxDisplacementSq>MAX_STEP_DISPLACEMENT*MAX_STEP_DISPLACEMENT){
+        double max = MAX_STEP_DISPLACEMENT;
+        printf("Error: The displacment of %f was larger the the allowed maximum of %f\n",sqrt(maxDisplacementSq),max);
+        fflush(stdout);
+        assert(0);  //Exceeds maximum displacement
+    }
+    #endif
 }
 
 void EulerMaruyamaTheta(){
@@ -610,12 +663,15 @@ void UpdatePersistence(){
         }
         // Have any contacts matured?
         if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
-            int contactIdx = particles[particleIdx].lastContact;
             
-            // Perform CIL
+            int contactIdx = particles[particleIdx].lastContact;
             VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
             VWrapAllTang(deltaR);
+            
+            // Perform differential CIL
             changeDirection(particleIdx,contactIdx,deltaR);
+            
+            
             
             // Change persistence
             if (particles[particleIdx].color == 1 && particles[contactIdx].color==0){
@@ -650,6 +706,12 @@ void UpdatePersistence(){
 
 //End: Support Functions for Single Step
 void SingleStep (int stepIdx){
+    if(updateNeighbourList==1){
+        updateNeighbourList = 0;
+        maxTotalDisplacement = 0;
+        BuildNeighbourList();
+
+    }
     ComputeInteractions();
     EulerMaruyamaR();
     EulerMaruyamaTheta();

@@ -7,11 +7,11 @@ set -e
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_new_CIL/test/test"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_CIL/test/3_1_23_no_list_1000"
 fi
 
 #Genrate make file using cmake with gprof flags for compiler and linker
-cmake -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg . -B build
+cmake -DCMAKE_CXX_FLAGS=-fno-stack-protector -DCMAKE_CXX_FLAGS=-pg -DCMAKE_EXE_LINKER_FLAGS=-pg -DCMAKE_SHARED_LINKER_FLAGS=-pg . -B build
 
 #compile
 cmake --build build --config Debug 

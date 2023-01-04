@@ -26,6 +26,10 @@ typedef struct {
     real contactTime; //Tracks the time of collision
 } particle ;
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  General  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#define MIN(i, j) (((i) < (j)) ? (i) : (j))
+#define MAX(i, j) (((i) > (j)) ? (i) : (j))
+
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Linear algebra ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
