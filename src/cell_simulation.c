@@ -357,10 +357,10 @@ void MeasureVelocities(real time){
 };
 
 void BuildNeighbourList(){
-    VecR cellWidth;
+    real cellWidth;
     VecI cellIdx;
     int linearCellIdx;
-    VDiv(cellWidth, region, cells);
+    cellWidth = (potentialRange+CELL_SIZE_EXTENSION);
 
      //Write linked list
     for(int n = nParticles; n < nParticles + VProd(cells); n++) cellList[n] = -1; //Reset list values
@@ -399,7 +399,7 @@ void BuildNeighbourList(){
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             distance = sqrt(VLenSq(deltaR));
-                            if(distance < cellWidth.x){
+                            if(distance < cellWidth){
                                 assert(nNeighbourPairs <= MAX_NEIGHBOUR_PAIRS); // We can't exceed the size of the neighbour list
                                 neighbourList[2*nNeighbourPairs] = pIdx1;
                                 neighbourList[2*nNeighbourPairs+1] = pIdx2;
@@ -486,19 +486,6 @@ void ComputeInteractions(){
     VecI cellIdx;
     int linearCellIdx;
     VDiv(cellWidth, region, cells);
-
-    //Write linked list
-    for(int n = nParticles; n < nParticles + VProd(cells); n++) cellList[n] = -1; //Reset list values
-    for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
-        VDiv(cellIdx,particles[particleIdx].r,cellWidth);
-        linearCellIdx = VLinear(cellIdx, cells) + nParticles;//Linearise matrix index to vector index
-        cellList[particleIdx] = cellList[linearCellIdx];
-        cellList[linearCellIdx] = particleIdx;
-        // Explaination: After this every cellIndex (cellList[nParticle:nParticle+nCells])
-        // links to the first particle in that cell, that then links to the next particle,
-        // until the particle chain finishes with -1
-    }
-
 
     //Delete old force values
     for(int particleIdx = 0; particleIdx < nParticles; particleIdx++) VZero(particles[particleIdx].force);
@@ -710,7 +697,6 @@ void SingleStep (int stepIdx){
         updateNeighbourList = 0;
         maxTotalDisplacement = 0;
         BuildNeighbourList();
-
     }
     ComputeInteractions();
     EulerMaruyamaR();

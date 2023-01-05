@@ -7,7 +7,7 @@ set -e
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_CIL/test/test"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/validation/areaFraction_0.5_Pe_80_with_list"
 fi
 
 #Genrate make file using cmake
@@ -34,7 +34,7 @@ fi
 
 #Analysis
 # echo "Plotting the tracks..."
-# python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
+python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
 # python3 ../analysis/animation_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_simulation.py $parameterFi
 # python3 /home/marius/PhD/CellMotility/analysis/write_mixing_index_sim.py $parameterFile

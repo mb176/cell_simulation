@@ -3,28 +3,28 @@
 set -e #Stop script when any command fails
 
 #setting the parameters
-stepLimit=1e6
+stepLimit=2e6
 stepDuration=1e-5
-skipSteps=0
+skipSteps=1e6
 measurementInterval=1e0
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.2 0.4 0.6)
-redD=9
-greenD=9
-greenPersistentD=1
+areaFractionList=(0.3 0.8)
+redD=3
+greenD=3
+greenPersistentD=3
 k=50
 tau=0.02
-PeList=(5 10 20 40 80 120)
-potentialRange=1.10868
+PeList=(120)
+potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
-redRedAdhesionMult=0.5
-greenGreenAdhesionMutl=0.5
-redGreenAdhesionMult=0.5
+redRedAdhesionMult=0
+greenGreenAdhesionMutl=0
+redGreenAdhesionMult=0
 
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/free_pairs/persistence_9_1/adhesion_tau_0.1"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/RDF"
 
 #Genrate make file using cmake
 cmake . -B build
