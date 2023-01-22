@@ -81,21 +81,38 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     t = clock();
     
     SetParameters(argc, argv);
-    SetUpJob();
-    //Logs
-    printf("Begin Simulation... \n");
-    fprintf(paramFile,"Begin Simulation... \n");
-    #ifdef DEBUG
-    printf("DEBUG MODE\n");
-    fprintf(paramFile,"DEBUG MODE\n");
-    #endif
+
+    printf("Simulation configuration: \n");
+    fprintf(paramFile,"Simulation configuration: \n");
     #ifdef turnAroundVariation
     double maxAngle = 360/(2*3.1416)*turnAroundVariation; 
     printf("Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
     fprintf(paramFile,"Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
     #endif
-    
-    
+
+    #ifdef DIFFERENTIAL_CIL
+    printf("Bonds between particles and CIL happen only in heterotypic contacts \n");
+    fprintf(paramFile,"Bonds between particles and CIL happen only in heterotypic contacts \n");
+    #else
+    printf("Bonds between particles and CIL happen in heterotypic and hometypic contacts \n");
+    fprintf(paramFile,"Bonds between particles and CIL happen in heterotypic and hometypic contacts \n");
+    #endif
+
+    printf("After collisions particles form bonds that last %f time units \n", CIL_DELAY);
+    fprintf(paramFile,"After collisions particles form bonds that last %f time units \n", CIL_DELAY);
+
+    #ifdef STICKY_CONTACTS
+    printf("Particles are connected by harmonic spings while bonds last \n");
+    fprintf(paramFile,"Particles are connected by harmonic spings while bonds last \n");
+    #endif
+    printf("The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
+    fprintf(paramFile,"The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
+
+
+    SetUpJob();
+
+    printf("Begin Simulation... \n");
+    fprintf(paramFile,"Begin Simulation... \n");
     for(int stepIdx = 0; stepIdx <= stepLimit; stepIdx++){
         simulationTime = stepIdx*stepDuration;
         //Iterate simulation, save positions at certain step indices
@@ -116,16 +133,17 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     double time_taken = ((double)t)/CLOCKS_PER_SEC;
     printf("\nSimulation ended after %f seconds \n",time_taken);
     fprintf(paramFile,"\nSimulation ended after %f seconds \n",time_taken);
-    #ifdef STICKY_CONTACTS
-    fprintf(paramFile, "Pairs are connected by harmonic springs; ");
-    #endif
-    fprintf(paramFile, "CIL delay time: %f \n", CIL_DELAY);
-
+    
     #ifdef MEASURE_COLLISION_ANGLE
     fprintf(paramFile, "Average angle after collision event: %f \n", collisionAngle/nCollisions);
     fprintf(paramFile, "Average collision duration: %f \n", collisionDuration/nCollisions);
     fprintf(paramFile, "Number of collisions: %d \n", nCollisions);
     #endif 
+
+    #ifdef DEBUG
+    printf("It was enforced that no particle exceed a maximum displacement of  %f in a single step \n", MAX_STEP_DISPLACEMENT);
+    fprintf(paramFile,"It was enforced that no particle exceed a maximum displacement of  %f in a single step \n", MAX_STEP_DISPLACEMENT);
+    #endif
 
     cleanup(); 
 }

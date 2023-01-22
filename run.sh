@@ -7,7 +7,7 @@ set -e
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/validation/areaFraction_0.5_Pe_80_with_list"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_CIL/test/test"
 fi
 
 #Genrate make file using cmake
@@ -17,7 +17,7 @@ cmake . -B build
 cmake --build build --config Debug
 
 # #Execute
-nReps=0
+nReps=1
 if [ $nReps == 0 ] 
 then
     ./build/src/agent_simulation $parameterFile "_tracks.csv" #2>>"${parameterFile}"
@@ -29,13 +29,12 @@ else
 fi
 
 # Ananlyse tracks
-# python3 ../analysis/plot_clustering_over_time_sim.py $parameterFile
-# python3 ../analysis/plot_mixing_index_sim.py $parameterFile
-
-#Analysis
-# echo "Plotting the tracks..."
 python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
-# python3 ../analysis/animation_sim.py $parameterFile
+# python3 /home/marius/PhD/CellMotility/analysis/plot_clustering_over_time_sim.py $parameterFile
+# python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_sim.py $parameterFile
+
+python3 /home/marius/PhD/CellMotility/analysis/animation_sim.py "${parameterFile}"
+
 # python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_simulation.py $parameterFi
 # python3 /home/marius/PhD/CellMotility/analysis/write_mixing_index_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/write_clustering_sim.py $parameterFile

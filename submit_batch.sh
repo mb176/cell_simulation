@@ -3,19 +3,19 @@
 set -e #Stop script when any command fails
 
 #setting the parameters
-stepLimit=2e6
+stepLimit=1e8
 stepDuration=1e-5
-skipSteps=1e6
-measurementInterval=1e0
+skipSteps=0
+measurementInterval=1e1
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.3 0.8)
+areaFractionList=(0.4 0.5)
 redD=3
 greenD=3
-greenPersistentD=3
+greenPersistentD=0.1
 k=50
 tau=0.02
-PeList=(120)
+PeList=(40 80 120 160)
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -23,8 +23,8 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_01/turnAround_persistence_t_1000"
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/RDF"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -37,7 +37,7 @@ for Pe in "${PeList[@]}"
 do 
 for areaFraction in "${areaFractionList[@]}"
 do
-filepath="${TARGET_FOLDER}/areaFraction_${areaFraction}_Pe_${Pe}"
+filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 
 # # Write parameter file
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")

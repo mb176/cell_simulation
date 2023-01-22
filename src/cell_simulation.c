@@ -35,7 +35,7 @@ double getNextParameter(FILE * file, char * parameterName){
 }
 
 void SetParameters(int argc, char** argv){
-    char PATH[100];
+    char PATH[500];
     char * trackFileSuffix;
     if(argc==2){ //Tracks file name unspecified
         strcpy(PATH,argv[1]);
@@ -49,7 +49,7 @@ void SetParameters(int argc, char** argv){
     
     // Files
     paramFile = fopen(PATH,"r+");
-    char tmp[100];
+    char tmp[500];
     strcpy(tmp, PATH);
     tracksFile = fopen(strcat(tmp,trackFileSuffix),"w");
 
@@ -102,7 +102,6 @@ void SetParameters(int argc, char** argv){
                      .y = length};  //Size of the simulation region
     cells.x = region.x/(potentialRange+CELL_SIZE_EXTENSION); //Smallest cells that are larger than interaction range
     cells.y = region.y/(potentialRange+CELL_SIZE_EXTENSION);
-
     nMeasurements = round((stepLimit-skipSteps)*(stepDuration/measurementInterval)) + 1; //+1 one because we do the first and the last step 
     seed = SEED;//time(NULL);
     rng = xoshiro256ss_init(seed);
@@ -357,10 +356,10 @@ void MeasureVelocities(real time){
 };
 
 void BuildNeighbourList(){
-    real cellWidth;
+    VecR cellWidth;
     VecI cellIdx;
     int linearCellIdx;
-    cellWidth = (potentialRange+CELL_SIZE_EXTENSION);
+    VDiv(cellWidth, region, cells);
 
      //Write linked list
     for(int n = nParticles; n < nParticles + VProd(cells); n++) cellList[n] = -1; //Reset list values
@@ -382,6 +381,7 @@ void BuildNeighbourList(){
     VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
     int nOffsets = 5;
     nNeighbourPairs = 0;
+    real neighbourRadiusSq = (potentialRange+CELL_SIZE_EXTENSION)*(potentialRange+CELL_SIZE_EXTENSION); //<= cellWidth^2
     //Go through all cells
     for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
         for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
@@ -398,8 +398,7 @@ void BuildNeighbourList(){
                         if(linearCellIdx1!=linearCellIdx2 || pIdx2 < pIdx1){ //Avoid double counting in same cell
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
-                            distance = sqrt(VLenSq(deltaR));
-                            if(distance < cellWidth){
+                            if(VLenSq(deltaR) < neighbourRadiusSq){ //WARNING: Assumes square cells/ regions
                                 assert(nNeighbourPairs <= MAX_NEIGHBOUR_PAIRS); // We can't exceed the size of the neighbour list
                                 neighbourList[2*nNeighbourPairs] = pIdx1;
                                 neighbourList[2*nNeighbourPairs+1] = pIdx2;
@@ -501,10 +500,16 @@ void ComputeInteractions(){
         VWrapAllTang(deltaR); //Apply periodic boundary condition
         distance = sqrt(VLenSq(deltaR));
         if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
+            #ifdef DIFFERENTIAL_CIL
             //Add contacts index to both particles if they are of different type
             if ((particles[pIdx1].color==0 && particles[pIdx2].color!=0) || (particles[pIdx1].color!=0 && particles[pIdx2].color==0)){
                 addContact(pIdx1, pIdx2);
+                nCollisions += 1;
             }
+            #else
+            addContact(pIdx1, pIdx2);
+            nCollisions += 1;
+            #endif
 
             //Repulsive forces
             if(LennardJones==1){
@@ -549,7 +554,8 @@ void ComputeInteractions(){
             VSub(deltaR, particles[pIdx].r,particles[particles[pIdx].lastContact].r);
             VWrapAllTang(deltaR); //Apply periodic boundary condition
             distance = sqrt(VLenSq(deltaR));
-            springForce = -5*k/distance*(distance-1); //Use stiff spring with 5*k
+
+            springForce = -10*k/distance*(distance-1); //Use stiff spring with 5*k
             VVSAdd(particles[pIdx].force,springForce,deltaR);
             #ifdef DEBUG
             int contactIdx = particles[pIdx].lastContact;
@@ -655,7 +661,7 @@ void UpdatePersistence(){
             VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
             VWrapAllTang(deltaR);
             
-            // Perform differential CIL
+            // Perform CIL
             changeDirection(particleIdx,contactIdx,deltaR);
             
             
@@ -679,7 +685,7 @@ void UpdatePersistence(){
             while(angle < -M_PI){angle += 2*M_PI;}
             collisionAngle += fabs(angle*360/2/M_PI);
             collisionDuration +=(simulationTime-particles[particleIdx].contactTime);
-            nCollisions += 1;
+            
             #endif //MEASURE_COLLISION_ANGLE
 
             // Clean up
