@@ -208,9 +208,30 @@ void InitialisePositions(){
     for(int particleIdx = 0; particleIdx < nParticles; particleIdx++){
         uniform1 = xoshire256ss_uniform(&rng);
         uniform2 = xoshire256ss_uniform(&rng);
+
+        #ifdef INITIAL_BLOB
+        real box_size = sqrt(nGreenParticles*M_PI/4); //Box with area equal to total area of green Particles
+        if(particles[particleIdx].color==0){ // Place red particles at the edge
+            particles[particleIdx].r.x = region.x*uniform1;
+            particles[particleIdx].r.y = region.y*uniform2;
+            // Shift particles out of the central box
+            if(particles[particleIdx].r.x< 0.5*region.x+0.5*box_size
+                && particles[particleIdx].r.x> 0.5*region.x-0.5*box_size
+                && particles[particleIdx].r.y< 0.5*region.y+0.5*box_size
+                && particles[particleIdx].r.y> 0.5*region.y-0.5*box_size){
+                    particles[particleIdx].r.x += box_size;
+                    // particles[particleIdx].r.y += region.y;
+                }
+        } else { // Blob green particles at the center
+            particles[particleIdx].r.x = 0.5*region.x+(uniform1-0.5)*box_size;
+            particles[particleIdx].r.y = 0.5*region.y+(uniform2-0.5)*box_size;
+        }
+        #else
         particles[particleIdx].r.x = region.x*uniform1;
         particles[particleIdx].r.y = region.y*uniform2;
+        #endif
     }
+    
 
     //Minimise Energy of initial positions with GSL conjugate gradient
 
@@ -414,8 +435,8 @@ void BuildNeighbourList(){
 
 void SetUpJob(){
     AllocArrays();
-    InitialisePositions();
     InitialiseColor();
+    InitialisePositions();
     InitialiseAngles();
     MeasurePositions(0);
     #ifdef TRACK_VELOCITIES

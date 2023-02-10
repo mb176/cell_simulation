@@ -7,7 +7,7 @@ skipSteps=0
 measurementInterval=1e0
 nGreenParticles=2000  
 nRedParticles=2000
-areaFractionList=(0.8)
+areaFractionList=(0.4 0.5)
 redD=3
 greenD=3
 greenPersistentD=0.1
@@ -21,7 +21,7 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/marius/PhD/CellMotility/agent_simulation/output_delayed_CIL/randomAngle"
+TARGET_FOLDER="/home/marius/PhD/CellMotility/agent_simulation/output_23_01/turnAround_persistence_t_1000"
 
 #Loop over parameter values
 for Pe in "${PeList[@]}"
@@ -30,9 +30,9 @@ for areaFraction in "${areaFractionList[@]}"
 do
 filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 
-python3 ../analysis/write_mixing_index_sim.py $filepath
+# python3 ../analysis/write_mixing_index_sim.py $filepath
 # python3 ../analysis/write_clustering_sim.py $filepath
-# python3 ../analysis/plot_last_frame_sim.py $filepath
+python3 ../analysis/plot_last_frame_sim.py $filepath
 # python3 ../analysis/animation_sim.py $parameterFile
 
 done

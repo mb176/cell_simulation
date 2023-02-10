@@ -108,6 +108,10 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
     fprintf(paramFile,"The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
 
+    #ifdef INITIAL_BLOB
+    printf("The green particles are intialised in a blob in the center\n");
+    fprintf(paramFile,"The green particles are intialised in a blob in the center\n");
+    #endif
 
     SetUpJob();
 

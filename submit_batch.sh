@@ -7,15 +7,15 @@ stepLimit=1e6
 stepDuration=1e-5
 skipSteps=0
 measurementInterval=1e0
-nGreenParticles=2000
-nRedParticles=2000
-areaFractionList=(0.1 0.3 0.5 0.7)
-redD=50
-greenD=50
-greenPersistentD=1
+nGreenParticles=10000
+nRedParticles=10000
+areaFractionList=(0.5)
+redD=3
+greenD=3
+greenPersistentD=0.1
 k=50
-tau=0.02
-PeList=(20 80 140 200)
+tau=0.1
+PeList=(40 80 120 160 200)
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -23,8 +23,7 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_delayed_CIL/free_pairs/dCIL_persistence_50_1/delay_0"
-
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_01/dCIL_persistence_initial_blob"
 
 #Genrate make file using cmake
 cmake . -B build
