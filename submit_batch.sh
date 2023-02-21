@@ -9,13 +9,13 @@ skipSteps=0
 measurementInterval=1e0
 nGreenParticles=10000
 nRedParticles=10000
-areaFractionList=(0.5)
+areaFractionList=(0.3 0.5 0.7)
 redD=3
 greenD=3
 greenPersistentD=0.1
-k=50
+kList=(1 10 20 50 70)
 tau=0.1
-PeList=(40 80 120 160 200)
+PeList=(40 120 200)
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -23,7 +23,7 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_01/dCIL_persistence_initial_blob"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_02/persistent_dCIL_k"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -36,7 +36,9 @@ for Pe in "${PeList[@]}"
 do 
 for areaFraction in "${areaFractionList[@]}"
 do
-filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
+for k in "${kList[@]}"
+do
+filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}_k_${k}"
 
 # # Write parameter file
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
@@ -74,7 +76,7 @@ sed -i "/parameterFile=/c\parameterFile=${filepath}" run_cluster.sh
 qsub run_cluster.sh
 
 
-
+done
 done
 done
 

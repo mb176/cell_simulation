@@ -17,7 +17,7 @@ parameterFile=/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output
 
 
 # Execute
-nReps=10
+nReps=1
 if [ $nReps == 0 ] 
 then
     ./build/src/agent_simulation $parameterFile "_tracks.csv" 2>>"${parameterFile}"

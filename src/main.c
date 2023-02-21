@@ -98,6 +98,11 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     fprintf(paramFile,"Bonds between particles and CIL happen in heterotypic and hometypic contacts \n");
     #endif
 
+    #ifdef ONLY_GREEN_CIL
+    printf("Only green cells perform CIL at the end of a contact\n");
+    fprintf(paramFile,"Only green cells perform CIL at the end of a contact\n");
+    #endif
+
     printf("After collisions particles form bonds that last %f time units \n", CIL_DELAY);
     fprintf(paramFile,"After collisions particles form bonds that last %f time units \n", CIL_DELAY);
 
@@ -112,6 +117,8 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("The green particles are intialised in a blob in the center\n");
     fprintf(paramFile,"The green particles are intialised in a blob in the center\n");
     #endif
+
+    
 
     SetUpJob();
 

@@ -53,13 +53,14 @@ void SetParameters(int argc, char** argv){
     strcpy(tmp, PATH);
     tracksFile = fopen(strcat(tmp,trackFileSuffix),"w");
 
+    printf("Parameter file: "); printf(PATH); printf("\n");
+
     #ifdef TRACK_VELOCITIES
     strcat(PATH, "_velocities");
     velocityTracksFile = fopen(strcat(PATH,trackFileSuffix),"w");
     //for some reason the strcat(...) in the previous line changes trackFileSuffix to "velocities". Why???
     #endif
 
-    printf("Parameter file: "); printf(PATH); printf("\n");
     printf("Initialise paramters:\n");
     
     //Read out parameters
@@ -485,8 +486,14 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
     #endif
     
     //Align velocity with the new direction based on how big turnAround is
+    
+    #ifdef ONLY_GREEN_CIL
+    if(particles[pIdx1].color!=0){ particles[pIdx1].theta += deltaTheta1*turnAround;}
+    if(particles[pIdx2].color!=0){ particles[pIdx2].theta += deltaTheta2*turnAround;}
+    #else
     particles[pIdx1].theta += deltaTheta1*turnAround;
     particles[pIdx2].theta += deltaTheta2*turnAround;
+    #endif
 
 }
 
@@ -682,7 +689,7 @@ void UpdatePersistence(){
             VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
             VWrapAllTang(deltaR);
             
-            // Perform CIL
+            // Perform CIL#
             changeDirection(particleIdx,contactIdx,deltaR);
             
             

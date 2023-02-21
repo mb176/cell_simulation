@@ -17,14 +17,14 @@
 
 // Normally the particles get randomly placed into the box, and then the minimisation algorithm is used to minimise overlaps
 
-#define INITIAL_BLOB // When set the system will be initialised with all green particles in a blob in the center
+// #define INITIAL_BLOB // When set the system will be initialised with all green particles in a blob in the center
 
-
+// #define ONLY_GREEN_CIL // When set, only green particles will change their direction upon contact 
 
 //////////////////////////////////////////////////////////// Numerical configurations ////////////////////////////////////////////////////
 
 //Technical constants for the rng and the GSL minimizer
-#define SEED time(NULL);
+#define SEED 1676491294;//time(NULL); 
 #define STEP_SIZE 1e-5; //Initial step size of the GSL minimizer
 #define LINE_TOL 1e-4; //Error tolerance for the line minimisation in a given direction
 #define TOL 1e-5; //Error tolerance for the overall minimisation
