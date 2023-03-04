@@ -94,8 +94,8 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("Bonds between particles and CIL happen only in heterotypic contacts \n");
     fprintf(paramFile,"Bonds between particles and CIL happen only in heterotypic contacts \n");
     #else
-    printf("Bonds between particles and CIL happen in heterotypic and hometypic contacts \n");
-    fprintf(paramFile,"Bonds between particles and CIL happen in heterotypic and hometypic contacts \n");
+    printf("Bonds between particles and CIL happen in heterotypic AND hometypic contacts \n");
+    fprintf(paramFile,"Bonds between particles and CIL happen in heterotypic AND hometypic contacts \n");
     #endif
 
     #ifdef ONLY_GREEN_CIL
@@ -105,6 +105,16 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
 
     printf("After collisions particles form bonds that last %f time units \n", CIL_DELAY);
     fprintf(paramFile,"After collisions particles form bonds that last %f time units \n", CIL_DELAY);
+
+    #ifdef CIL_COOLDOWN_DURATION
+    printf("CIL events have a refreshing cooldown of %f (no effect on persistence)\n",CIL_COOLDOWN_DURATION);
+    fprintf(paramFile,"CIL events have a refreshing cooldown of %f (no effect on persistence)\n",CIL_COOLDOWN_DURATION);
+    #endif
+
+    #ifdef NON_DIFFERENTIAL_PERSISTENCE
+    printf("Persistence changes for BOTH red and green cells after contacts \n");
+    fprintf(paramFile,"Persistence changes for BOTH red and green cells after contacts \n");
+    #endif
 
     #ifdef STICKY_CONTACTS
     printf("Particles are connected by harmonic spings while bonds last \n");

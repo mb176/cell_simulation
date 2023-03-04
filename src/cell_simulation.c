@@ -318,6 +318,7 @@ void InitialiseColor(){
         particles[particleIdx].color = 1;
         particles[particleIdx].lastContact = -1;
         particles[particleIdx].contactTime = -1;
+        particles[particleIdx].cilCooldown = -1;
     }
     //Red particles
     for(int particleIdx = nGreenParticles; particleIdx < nGreenParticles + nRedParticles; particleIdx++){
@@ -326,6 +327,7 @@ void InitialiseColor(){
         particles[particleIdx].color = 0;
         particles[particleIdx].lastContact = -1;
         particles[particleIdx].contactTime = -1;
+        particles[particleIdx].cilCooldown = -1;
     }
 };
 
@@ -486,14 +488,20 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
     #endif
     
     //Align velocity with the new direction based on how big turnAround is
-    
+    //NOte: Checks for cilCooldown; If CIL_COOLDOWN_DURATION is not set cilCooldown=-1 always
     #ifdef ONLY_GREEN_CIL
-    if(particles[pIdx1].color!=0){ particles[pIdx1].theta += deltaTheta1*turnAround;}
-    if(particles[pIdx2].color!=0){ particles[pIdx2].theta += deltaTheta2*turnAround;}
+    if(particles[pIdx1].color!=0 && particles[pIdx1].cilCooldown<simulationTime){ particles[pIdx1].theta += deltaTheta1*turnAround;}
+    if(particles[pIdx2].color!=0 && particles[pIdx2].cilCooldown<simulationTime){ particles[pIdx2].theta += deltaTheta2*turnAround;}
     #else
-    particles[pIdx1].theta += deltaTheta1*turnAround;
-    particles[pIdx2].theta += deltaTheta2*turnAround;
+    if(particles[pIdx1].cilCooldown<simulationTime){particles[pIdx1].theta += deltaTheta1*turnAround;}
+    if(particles[pIdx2].cilCooldown<simulationTime){particles[pIdx2].theta += deltaTheta2*turnAround;}
     #endif
+
+    // Set/ refresh CIL cooldown
+    #ifdef CIL_COOLDOWN_DURATION
+    particles[pIdx1].cilCooldown = simulationTime+CIL_COOLDOWN_DURATION;
+    particles[pIdx2].cilCooldown = simulationTime+CIL_COOLDOWN_DURATION;
+    #endif  
 
 }
 
@@ -504,6 +512,7 @@ void addContact(int pIdx1, int pIdx2){
         particles[pIdx1].contactTime = simulationTime;
         particles[pIdx2].lastContact = pIdx1;
         particles[pIdx2].contactTime = simulationTime;
+        
     }
 }
 
@@ -682,6 +691,16 @@ void UpdatePersistence(){
                 particles[particleIdx].decayTimer = 0;
             }
         }
+        #ifdef NON_DIFFERENTIAL_PERSISTENCE
+        // Update persistence for red particles as well
+        if(particles[particleIdx].color==0){
+            if(particles[particleIdx].decayTimer <= 0){
+                particles[particleIdx].D = redD;
+                particles[particleIdx].decayTimer = 0;
+            }
+        }
+        #endif
+
         // Have any contacts matured?
         if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
             
@@ -689,7 +708,7 @@ void UpdatePersistence(){
             VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
             VWrapAllTang(deltaR);
             
-            // Perform CIL#
+            // Perform CIL
             changeDirection(particleIdx,contactIdx,deltaR);
             
             
@@ -703,8 +722,23 @@ void UpdatePersistence(){
             if (particles[contactIdx].color == 1 && particles[particleIdx].color==0){
                 particles[contactIdx].color = 2; 
                 particles[contactIdx].D = greenPersistentD;
-                particles[contactIdx].decayTimer = tau;
+                particles[contactIdx].decayTimer = tau;     
             }
+
+            
+            #ifdef NON_DIFFERENTIAL_PERSISTENCE
+            // Red particles also get increased persistence
+            if (particles[particleIdx].color == 0 && particles[contactIdx].color!=0){
+                particles[particleIdx].D = greenPersistentD;
+                particles[particleIdx].decayTimer = tau;
+            }
+            if (particles[contactIdx].color == 0 && particles[particleIdx].color!=0){
+                particles[contactIdx].D = greenPersistentD;
+                particles[contactIdx].decayTimer = tau; 
+            }
+            #endif
+
+            
             
             #ifdef MEASURE_COLLISION_ANGLE
             //Print the angle at which the particles went persistent
@@ -713,7 +747,6 @@ void UpdatePersistence(){
             while(angle < -M_PI){angle += 2*M_PI;}
             collisionAngle += fabs(angle*360/2/M_PI);
             collisionDuration +=(simulationTime-particles[particleIdx].contactTime);
-            
             #endif //MEASURE_COLLISION_ANGLE
 
             // Clean up

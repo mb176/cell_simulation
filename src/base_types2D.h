@@ -24,6 +24,7 @@ typedef struct {
     int color; //red = 0, green =1 , persistent green = 2
     int lastContact; //tracks the last opposite particle this one has been in contact with
     real contactTime; //Tracks the time of collision
+    real cilCooldown; // While coming down no CIL is performed (persistence change still possible)
 } particle ;
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  General  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
