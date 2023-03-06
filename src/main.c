@@ -129,6 +129,11 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     #endif
 
     
+    #ifdef INITIAL_PHASE_SEGREGATION
+    printf("Initially the system is split into a green and a red half\n");
+    fprintf(paramFile,"Initially the system is split into a green and a red half\n");
+    #endif
+    
 
     SetUpJob();
 

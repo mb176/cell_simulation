@@ -96,8 +96,13 @@ void SetParameters(int argc, char** argv){
 
     //Initialise secondary parameters
     nParticles = nGreenParticles + nRedParticles;
+    #ifdef INITIAL_PHASE_SEGREGATION
+    //Qudratic packing, ideally the number of particles is the square of an integter
+    real length = ceil(sqrt(nParticles));
+    #else
     //Setup Square area to fit the area fraction; each particle covers area of size pi*0.5^2 = 0.785398
     real length = sqrt(nParticles*0.785398/areaFraction);
+    #endif
     printf("length=%f \n",length);
     region = (VecR) {.x = length,
                      .y = length};  //Size of the simulation region
@@ -227,6 +232,12 @@ void InitialisePositions(){
             particles[particleIdx].r.x = 0.5*region.x+(uniform1-0.5)*box_size;
             particles[particleIdx].r.y = 0.5*region.y+(uniform2-0.5)*box_size;
         }
+        #elif defined INITIAL_PHASE_SEGREGATION
+        int rowLength = ceil(sqrt(nParticles));
+        int xPosition = particleIdx % rowLength;
+        int yPosition = particleIdx / rowLength;
+        particles[particleIdx].r.x = xPosition + 0.5;
+        particles[particleIdx].r.y = yPosition + 0.5;
         #else
         particles[particleIdx].r.x = region.x*uniform1;
         particles[particleIdx].r.y = region.y*uniform2;

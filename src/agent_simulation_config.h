@@ -2,8 +2,8 @@
 
 //////////////////////////////////////////////////////////// Modifications to the model ////////////////////////////////////////////////////
 
-//If defined CIL only happens in heterotypic contacts, otherwise in all contacts (subject to turnAround begin >0)
-// #define DIFFERENTIAL_CIL
+//If defined CIL only happens in heterotypic contacts, otherwise in all contacts (subject to turnAround being >0)
+#define DIFFERENTIAL_CIL
 
 //How long is CIL delayed after contact? (-1) corresponds to no contact delay
 #define CIL_DELAY -1.0 //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
@@ -13,9 +13,9 @@
 
 // #define turnAroundVariation M_PI; //if defined the angle after turnAround will be randomised by a uniformly drawn angle with maximal value turnAroundVariation in radians
 
-#define CIL_COOLDOWN_DURATION 0.02 // If defined CIL has a (resetting) cooldown (persistence change still possible)
+// #define CIL_COOLDOWN_DURATION 0.02 // If defined CIL has a (resetting) cooldown (persistence change still possible)
 
-#define NON_DIFFERENTIAL_PERSISTENCE
+// #define NON_DIFFERENTIAL_PERSISTENCE
 
 //////////////////////////////////////////////////////////// Alternative initialisations ////////////////////////////////////////////////////
 
@@ -24,6 +24,8 @@
 // #define INITIAL_BLOB // When set the system will be initialised with all green particles in a blob in the center
 
 // #define ONLY_GREEN_CIL // When set, only green particles will change their direction upon contact 
+
+#define INITIAL_PHASE_SEGREGATION // When defined will initialise in quadratic packing with green on one side and red on the other; will ignore areaFraction
 
 //////////////////////////////////////////////////////////// Numerical configurations ////////////////////////////////////////////////////
 

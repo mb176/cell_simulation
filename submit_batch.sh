@@ -3,19 +3,19 @@
 set -e #Stop script when any command fails
 
 #setting the parameters
-stepLimit=5e6
+stepLimit=2e6
 stepDuration=1e-5
 skipSteps=0
-measurementInterval=5e0
-nGreenParticles=2000
-nRedParticles=2000
-areaFractionList=(0.6 0.7 0.8)
+measurementInterval=1e0
+nGreenParticles=5000
+nRedParticles=5000
+areaFractionList=(0.1 0.3 0.5 0.7)
 redD=3
 greenD=3
 greenPersistentD=0.1
 kList=(50)
-tau=0.1
-PeList=(40 120 200)
+tau=0.02
+PeList=(0 40 80 120 160 200)
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -23,7 +23,7 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_02/cooldown_CIL/non_differential_persistence/tau_0.1"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_03/fingering_instability"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -44,7 +44,7 @@ filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # greenGreenAdhesionMutl=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # redGreenAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
-k=$(bc <<< "scale=5; 2*$Pe")
+k=$(bc <<< "scale=5; 0.05*$Pe")
 
 echo $filepath
 echo "stepLimit               : $stepLimit" > "$filepath" 
