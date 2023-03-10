@@ -2,20 +2,20 @@
 
 set -e #Stop script when any command fails
 
-#setting the parameters
-stepLimit=2e6
+# Choose parameters
+stepLimit=1e7
 stepDuration=1e-5
 skipSteps=0
-measurementInterval=1e0
-nGreenParticles=5000
-nRedParticles=5000
-areaFractionList=(0.1 0.3 0.5 0.7)
+measurementInterval=5e0
+nGreenParticles=2000
+nRedParticles=2000
+areaFractionList=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8)
 redD=3
 greenD=3
 greenPersistentD=0.1
 kList=(50)
 tau=0.02
-PeList=(0 40 80 120 160 200)
+PeList=(240 280 320)
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -23,7 +23,24 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_03/fingering_instability"
+# Choose simulation options
+sed -i "/#define DIFFERENTIAL_CIL/c\#define DIFFERENTIAL_CIL" src/agent_simulation_config.h
+sed -i "/#define CIL_DELAY/c\#define CIL_DELAY -1.0" src/agent_simulation_config.h
+sed -i "/#define STICKY_CONTACTS/c\// #define STICKY_CONTACTS" src/agent_simulation_config.h
+sed -i "/#define turnAroundVariation/c\// #define turnAroundVariation M_PI" src/agent_simulation_config.h
+sed -i "/#define CIL_COOLDOWN_DURATION/c\// #define CIL_COOLDOWN_DURATION 0.02" src/agent_simulation_config.h
+sed -i "/#define NON_DIFFERENTIAL_PERSISTENCE/c\// #define NON_DIFFERENTIAL_PERSISTENCE" src/agent_simulation_config.h
+
+# Choose initial conditions
+sed -i "/#define INITIAL_BLOB/c\// #define INITIAL_BLOB" src/agent_simulation_config.h
+sed -i "/#define ONLY_GREEN_CIL/c\// #define ONLY_GREEN_CIL" src/agent_simulation_config.h
+sed -i "/#define INITIAL_PHASE_SEGREGATION/c\// #define INITIAL_PHASE_SEGREGATION" src/agent_simulation_config.h
+
+# Choose number of repetitions
+nReps=1
+
+
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_03/phasediagram/t_100"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -71,7 +88,7 @@ echo "redGreenAdhesionMult    : $redGreenAdhesionMult" >> "$filepath"
 #Modify the submission script (run_cluster.sh)
 sed -i "/#PBS -N */c\#PBS -N ${filepath}" run_cluster.sh #-i for inplace, searches patter /.../ and changes it (c) to \...
 sed -i "/parameterFile=/c\parameterFile=${filepath}" run_cluster.sh
-# sed -i "/nReps=*/c\nReps=${nReps}" run_cluster.sh
+sed -i "/nReps=/c\nReps=${nReps}" run_cluster.sh
 
 #submit the job
 qsub run_cluster.sh

@@ -18,22 +18,23 @@ parameterFile=/home/clustor2/ma/m/mpb19/CellMotility/agent_simulation/new_output
 
 # Execute
 nReps=1
-if [ $nReps == 0 ] 
-then
-    ./build/src/agent_simulation $parameterFile "_tracks.csv" 2>>"${parameterFile}"
-else
-    for i in $(seq $nReps)
-    do
-        ./build/src/agent_simulation $parameterFile "_tracks_${i}.csv" 2>>"${parameterFile}"
-    done
-fi
+for i in $(seq $nReps)
+do
+    ./build/src/agent_simulation $parameterFile "_tracks_${i}.csv" 2>>"${parameterFile}"
+done
+# if [ $nReps == 0 ] 
+# then
+#     ./build/src/agent_simulation $parameterFile "_tracks.csv" 2>>"${parameterFile}"
+# else
+
+# fi
 
 # Ananlyse tracks
-# python3 ../analysis/write_mixing_index_sim.py $parameterFile
-# python3 ../analysis/write_clustering_sim.py $parameterFile
+python3 ../analysis/write_mixing_index_sim.py $parameterFile
+python3 ../analysis/write_clustering_sim.py $parameterFile
 
 
-python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/animation_sim.py "${parameterFile}"
+# python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/animation_sim.py "${parameterFile}"
 python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/plot_last_frame_sim.py "${parameterFile}"
 # python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/calculate_mixing_index_simulation.py "${parameterFile}"
 # python3 /home/clustor2/ma/m/mpb19/CellMotility/analysis/cluster_analysis_simulation.py "${parameterFile}"

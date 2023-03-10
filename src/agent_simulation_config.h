@@ -2,18 +2,19 @@
 
 //////////////////////////////////////////////////////////// Modifications to the model ////////////////////////////////////////////////////
 
-//If defined CIL only happens in heterotypic contacts, otherwise in all contacts (subject to turnAround being >0)
+//If defined CIL only happens in heterotypic  contacts, otherwise in all contacts (subject to turnAround being >0)
 #define DIFFERENTIAL_CIL
 
 //How long is CIL delayed after contact? (-1) corresponds to no contact delay
-#define CIL_DELAY -1.0 //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
+//Inspired from experiments we set the duration of contact to be half the duration of increased persistence
+#define CIL_DELAY -1.0
 
 // Should particles be connected via harmonic springs while CIL is delayed?
-// #define STICKY_CONTACTS 
+// #define STICKY_CONTACTS
 
-// #define turnAroundVariation M_PI; //if defined the angle after turnAround will be randomised by a uniformly drawn angle with maximal value turnAroundVariation in radians
+// #define turnAroundVariation M_PI
 
-// #define CIL_COOLDOWN_DURATION 0.02 // If defined CIL has a (resetting) cooldown (persistence change still possible)
+// #define CIL_COOLDOWN_DURATION 0.02
 
 // #define NON_DIFFERENTIAL_PERSISTENCE
 
@@ -21,11 +22,11 @@
 
 // Normally the particles get randomly placed into the box, and then the minimisation algorithm is used to minimise overlaps
 
-// #define INITIAL_BLOB // When set the system will be initialised with all green particles in a blob in the center
+// #define INITIAL_BLOB
 
-// #define ONLY_GREEN_CIL // When set, only green particles will change their direction upon contact 
+// #define ONLY_GREEN_CIL
 
-#define INITIAL_PHASE_SEGREGATION // When defined will initialise in quadratic packing with green on one side and red on the other; will ignore areaFraction
+#define INITIAL_PHASE_SEGREGATION
 
 //////////////////////////////////////////////////////////// Numerical configurations ////////////////////////////////////////////////////
 
