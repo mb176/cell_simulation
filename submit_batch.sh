@@ -3,33 +3,33 @@
 set -e #Stop script when any command fails
 
 # Choose parameters
-stepLimit=1e7
+stepLimit=2e7
 stepDuration=1e-5
 skipSteps=0
-measurementInterval=5e0
+measurementInterval=1e1
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8)
-redD=3
-greenD=3
-greenPersistentD=0.1
+areaFractionList=(0.9)
+redD=4
+greenD=4
+greenPersistentD=0.5
 kList=(50)
-tau=0.02
-PeList=(240 280 320)
-potentialRange=1  #1.10868
-LennardJones=1
+tau=4.9348
+PeList=(20 100 200 300)
+potentialRange=1.20978631683  #1.10868
+LennardJones=0
 turnAround=1
-redRedAdhesionMult=0
-greenGreenAdhesionMutl=0
-redGreenAdhesionMult=0
+redRedAdhesionMult=1
+greenGreenAdhesionMutl=1
+redGreenAdhesionMult=1
 
 # Choose simulation options
-sed -i "/#define DIFFERENTIAL_CIL/c\#define DIFFERENTIAL_CIL" src/agent_simulation_config.h
+sed -i "/#define DIFFERENTIAL_CIL/c\//#define DIFFERENTIAL_CIL" src/agent_simulation_config.h
 sed -i "/#define CIL_DELAY/c\#define CIL_DELAY -1.0" src/agent_simulation_config.h
 sed -i "/#define STICKY_CONTACTS/c\// #define STICKY_CONTACTS" src/agent_simulation_config.h
 sed -i "/#define turnAroundVariation/c\// #define turnAroundVariation M_PI" src/agent_simulation_config.h
-sed -i "/#define CIL_COOLDOWN_DURATION/c\// #define CIL_COOLDOWN_DURATION 0.02" src/agent_simulation_config.h
-sed -i "/#define NON_DIFFERENTIAL_PERSISTENCE/c\// #define NON_DIFFERENTIAL_PERSISTENCE" src/agent_simulation_config.h
+sed -i "/#define CIL_COOLDOWN_DURATION/c\#define CIL_COOLDOWN_DURATION 0.02" src/agent_simulation_config.h
+sed -i "/#define NON_DIFFERENTIAL_PERSISTENCE/c\#define NON_DIFFERENTIAL_PERSISTENCE" src/agent_simulation_config.h
 
 # Choose initial conditions
 sed -i "/#define INITIAL_BLOB/c\// #define INITIAL_BLOB" src/agent_simulation_config.h
@@ -40,7 +40,7 @@ sed -i "/#define INITIAL_PHASE_SEGREGATION/c\// #define INITIAL_PHASE_SEGREGATIO
 nReps=1
 
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_03/phasediagram/t_100"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_02/cooldown_CIL/non_differential_persistence/tau_5"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -61,7 +61,7 @@ filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # greenGreenAdhesionMutl=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # redGreenAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
-k=$(bc <<< "scale=5; 0.05*$Pe")
+k=$(bc <<< "scale=5; 2*$Pe")
 
 echo $filepath
 echo "stepLimit               : $stepLimit" > "$filepath" 
@@ -98,7 +98,7 @@ done
 done
 done
 
-#Plot the mixing index
+# Plot the mixing index
 # python3 ../analysis/plot_mixing_index_simulation.py "${TARGET_FOLDER}/mixingIndex"
 
 

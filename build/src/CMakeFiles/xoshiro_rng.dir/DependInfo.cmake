@@ -11,8 +11,8 @@ set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/marius/PhD/CellMotility/agent_simulation/src/xoshiro_rng.c" "src/CMakeFiles/xoshiro_rng.dir/xoshiro_rng.c.o" "gcc" "src/CMakeFiles/xoshiro_rng.dir/xoshiro_rng.c.o.d"
   )
 
-# Targets to which this target links.
-set(CMAKE_TARGET_LINKED_INFO_FILES
+# Targets to which this target links which contain Fortran sources.
+set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES
   )
 
 # Fortran module output directory.
