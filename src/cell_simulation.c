@@ -83,7 +83,7 @@ void SetParameters(int argc, char** argv){
     redRedAdhesionMult = getNextParameter(paramFile,"redRedAdhesionMult");
     greenGreenAdhesionMutl = getNextParameter(paramFile,"greenGreenAdhesionMutl");
     redGreenAdhesionMult = getNextParameter(paramFile,"redGreenAdhesionMult");
-
+    printf("1 \n"); fflush(stdout);
     // Barricades
     //measurementInterval must be a multiple of stepDuration 
     assert((measurementInterval/stepDuration)-round(measurementInterval/stepDuration)< 1e-4);
@@ -321,7 +321,7 @@ void InitialisePositions(){
     gsl_vector_free (x);
 };
 
-void InitialiseColor(){
+void InitialiseInternalStates(){
     //Green particles
     for(int particleIdx = 0; particleIdx < nGreenParticles; particleIdx++){
         particles[particleIdx].D = greenD;
@@ -430,7 +430,7 @@ void BuildNeighbourList(){
                 //Go through all particles in the cells
                 for(int pIdx1 = cellList[linearCellIdx1]; pIdx1 >=0; pIdx1 = cellList[pIdx1]){
                     for(int pIdx2 = cellList[linearCellIdx2]; pIdx2 >=0; pIdx2 = cellList[pIdx2]){
-                        if(linearCellIdx1!=linearCellIdx2 || pIdx2 < pIdx1){ //Avoid double counting in same cell
+                        if(linearCellIdx1<linearCellIdx2 || (linearCellIdx1==linearCellIdx2 && pIdx2 < pIdx1)){ //Avoid double counting
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             if(VLenSq(deltaR) < neighbourRadiusSq){ //WARNING: Assumes square cells/ regions
@@ -445,11 +445,15 @@ void BuildNeighbourList(){
             }
         }
     }
+    // printf("Neighbour list:");
+    // for(int n=0; n<nNeighbourPairs; n++){printf("(%d,%d), ", neighbourList[2*n], neighbourList[2*n+1]);}
+    // printf("\n");
+
 }
 
 void SetUpJob(){
     AllocArrays();
-    InitialiseColor();
+    InitialiseInternalStates();
     InitialisePositions();
     InitialiseAngles();
     MeasurePositions(0);
@@ -472,7 +476,7 @@ real LennardJonesForce(real distance){
     return 12*k*invDistance6*(invDistance6-1)*invDistance2;
 }
 
-real getAngle(VecR r){
+real GetAngle(VecR r){
     double theta;
     if(r.x>=0){
         theta = atan(r.y/r.x);
@@ -482,17 +486,17 @@ real getAngle(VecR r){
     return theta;
 }
 
-void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
+void ChangeDirection(int pIdx1, int pIdx2, VecR deltaR){
     //Particles turn away from each other after contact
     
-    real theta = getAngle(deltaR);
+    real theta = GetAngle(deltaR);
     real deltaTheta1, deltaTheta2;
 
 
-    #ifdef turnAroundVariation 
+    #ifdef TURN_AROUND_VARIATION 
     // //Randomise the turn-around directions
-    deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
-    deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*turnAroundVariation - particles[pIdx1].theta;
+    deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
+    deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
     #else
     deltaTheta1 = theta - particles[pIdx1].theta;
     deltaTheta2 = theta + M_PI - particles[pIdx2].theta;
@@ -508,7 +512,7 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
     if(particles[pIdx2].cilCooldown<simulationTime){particles[pIdx2].theta += deltaTheta2*turnAround;}
     #endif
 
-    // Set/ refresh CIL cooldown
+    // Refresh CIL cooldown
     #ifdef CIL_COOLDOWN_DURATION
     particles[pIdx1].cilCooldown = simulationTime+CIL_COOLDOWN_DURATION;
     particles[pIdx2].cilCooldown = simulationTime+CIL_COOLDOWN_DURATION;
@@ -516,15 +520,16 @@ void changeDirection(int pIdx1, int pIdx2, VecR deltaR){
 
 }
 
-void addContact(int pIdx1, int pIdx2){
+void AddContact(int pIdx1, int pIdx2){
     //Adds the contactIdx to the new particle, if it doesn't already have a contact.
     if((particles[pIdx1].lastContact == -1)&&(particles[pIdx2].lastContact==-1)){ //No partner already
         particles[pIdx1].lastContact = pIdx2;
         particles[pIdx1].contactTime = simulationTime;
         particles[pIdx2].lastContact = pIdx1;
         particles[pIdx2].contactTime = simulationTime;
-        
+        // printf("Contact index added: %d, %d, %d, %d, %f \n",particles[0].lastContact, particles[1].lastContact, particles[2].lastContact, particles[3].lastContact, simulationTime);
     }
+    
 }
 
 void ComputeInteractions(){
@@ -551,11 +556,11 @@ void ComputeInteractions(){
             #ifdef DIFFERENTIAL_CIL
             //Add contacts index to both particles if they are of different type
             if ((particles[pIdx1].color==0 && particles[pIdx2].color!=0) || (particles[pIdx1].color!=0 && particles[pIdx2].color==0)){
-                addContact(pIdx1, pIdx2);
+                AddContact(pIdx1, pIdx2);
                 nCollisions += 1;
             }
             #else
-            addContact(pIdx1, pIdx2);
+            AddContact(pIdx1, pIdx2);
             nCollisions += 1;
             #endif
 
@@ -686,7 +691,7 @@ void EnforcePeriodicBoundaries(){
     }
 }
 
-void UpdatePersistence(){
+void UpdateInternalStates(){
     VecR deltaR;
     real distance;
     for(int particleIdx=0; particleIdx < nParticles; particleIdx++){
@@ -714,16 +719,15 @@ void UpdatePersistence(){
 
         // Have any contacts matured?
         if ((particles[particleIdx].lastContact!=-1) && (simulationTime-particles[particleIdx].contactTime>CIL_DELAY)){
-            
             int contactIdx = particles[particleIdx].lastContact;
+            // printf("Contacts matured: %d, %d \n", particleIdx, contactIdx);
             VSub(deltaR, particles[particleIdx].r,particles[contactIdx].r);
             VWrapAllTang(deltaR);
             
             // Perform CIL
-            changeDirection(particleIdx,contactIdx,deltaR);
+            ChangeDirection(particleIdx,contactIdx,deltaR);
             
-            
-            
+
             // Change persistence
             if (particles[particleIdx].color == 1 && particles[contactIdx].color==0){
                 particles[particleIdx].color = 2; 
@@ -780,7 +784,7 @@ void SingleStep (int stepIdx){
     EulerMaruyamaR();
     EulerMaruyamaTheta();
     EnforcePeriodicBoundaries();
-    UpdatePersistence();
+    UpdateInternalStates();
     int measurementSteps = round(measurementInterval/stepDuration); 
     if(((stepIdx > skipSteps) && (stepIdx % measurementSteps == 0)) ){ //Time for measurement? 
         MeasurePositions(stepIdx*stepDuration);

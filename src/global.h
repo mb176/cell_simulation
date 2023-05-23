@@ -1,8 +1,7 @@
 #ifndef global_variables
 #define global_variables
 
-#define MAX_LINE_LENGTH 200
-#define MAX_STRING_LENGTH 50
+
 #include "base_types2D.h"
 #include "agent_simulation_config.h"
 

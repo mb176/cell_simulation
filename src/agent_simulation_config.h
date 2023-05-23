@@ -2,8 +2,8 @@
 
 //////////////////////////////////////////////////////////// Modifications to the model ////////////////////////////////////////////////////
 
-//If defined CIL only happens in heterotypic  contacts, otherwise in all contacts (subject to turnAround being >0)
-#define DIFFERENTIAL_CIL
+//If defined CIL only happens in heterotypic  contacts, otherwise in all contacts (subject to the turnAround parameter being >0)
+//#define DIFFERENTIAL_CIL
 
 //How long is CIL delayed after contact? (-1) corresponds to no contact delay
 //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
@@ -12,11 +12,11 @@
 // Should particles be connected via harmonic springs while CIL is delayed?
 // #define STICKY_CONTACTS
 
-// #define turnAroundVariation M_PI
+// #define TURN_AROUND_VARIATION M_PI
 
-// #define CIL_COOLDOWN_DURATION 0.02
+#define CIL_COOLDOWN_DURATION 64
 
-// #define NON_DIFFERENTIAL_PERSISTENCE
+#define NON_DIFFERENTIAL_PERSISTENCE
 
 //////////////////////////////////////////////////////////// Alternative initialisations ////////////////////////////////////////////////////
 
@@ -26,7 +26,7 @@
 
 // #define ONLY_GREEN_CIL
 
-#define INITIAL_PHASE_SEGREGATION
+// #define INITIAL_PHASE_SEGREGATION
 
 //////////////////////////////////////////////////////////// Numerical configurations ////////////////////////////////////////////////////
 
@@ -40,6 +40,8 @@
 #define MAX_NEIGHBOUR_PAIRS 20*nParticles
 // Extends the size of computational cells beyond the interaction radius. When particle displacement exceeds this value, the neighbourhood list needs updating
 #define CELL_SIZE_EXTENSION 1
+#define MAX_LINE_LENGTH 200
+#define MAX_STRING_LENGTH 50
 
 //////////////////////////////////////////////////////////// Optional outputs //////////////////////////////////////////////////////////
 

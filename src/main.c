@@ -78,8 +78,7 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
 */  
 
     clock_t t;
-    t = clock();
-    
+    t = clock(); 
     SetParameters(argc, argv);
 
     printf("Simulation configuration: \n");
@@ -89,6 +88,9 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
     fprintf(paramFile,"Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
     #endif
+
+    printf("After collisions particles form bonds that last %f time units before they trigger CIL.\n", CIL_DELAY);
+    fprintf(paramFile,"After collisions particles form bonds that last %f time units before they trigger CIL.\n", CIL_DELAY);
 
     #ifdef DIFFERENTIAL_CIL
     printf("Bonds between particles and CIL happen only in heterotypic contacts \n");
@@ -102,9 +104,6 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("Only green cells perform CIL at the end of a contact\n");
     fprintf(paramFile,"Only green cells perform CIL at the end of a contact\n");
     #endif
-
-    printf("After collisions particles form bonds that last %f time units \n", CIL_DELAY);
-    fprintf(paramFile,"After collisions particles form bonds that last %f time units \n", CIL_DELAY);
 
     #ifdef CIL_COOLDOWN_DURATION
     printf("CIL events have a refreshing cooldown of %f (no effect on persistence)\n",CIL_COOLDOWN_DURATION);

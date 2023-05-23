@@ -7,13 +7,13 @@ skipSteps=0
 measurementInterval=1e0
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8)
+areaFractionList=(0.8)
 redD=3
 greenD=3
 greenPersistentD=0.1
 kList=(1)
 tau=0.02
-PeList=(0 40 80 120 160 200 240 280 320)
+PeList=(0.001 0.005 0.01 0.02 0.05 0.1 0.2 0.5 )
 potentialRange=1  #1.10868
 LennardJones=1
 turnAround=1
@@ -21,7 +21,7 @@ redRedAdhesionMult=0
 greenGreenAdhesionMutl=0
 redGreenAdhesionMult=0
 
-TARGET_FOLDER="/home/marius/PhD/CellMotility/agent_simulation/output_23_03/phasediagram/t_100"
+TARGET_FOLDER="/home/marius/PhD/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.001"
 
 #Loop over parameter values
 for Pe in "${PeList[@]}"

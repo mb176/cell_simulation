@@ -3,19 +3,19 @@
 set -e #Stop script when any command fails
 
 # Choose parameters
-stepLimit=2e7
-stepDuration=1e-5
+stepLimit=1e6
+stepDuration=1e0
 skipSteps=0
-measurementInterval=1e1
+measurementInterval=1e5
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.9)
-redD=4
-greenD=4
-greenPersistentD=0.5
-kList=(50)
-tau=4.9348
-PeList=(20 100 200 300)
+areaFractionList=(0.8)
+redD=2
+greenD=2
+greenPersistentD=0
+kList=(0.001)
+tau=64
+PeList=(0.001 0.005 0.01 0.02 0.05 0.1 0.2 0.5 )
 potentialRange=1.20978631683  #1.10868
 LennardJones=0
 turnAround=1
@@ -40,7 +40,7 @@ sed -i "/#define INITIAL_PHASE_SEGREGATION/c\// #define INITIAL_PHASE_SEGREGATIO
 nReps=1
 
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_02/cooldown_CIL/non_differential_persistence/tau_5"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.001"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -61,7 +61,7 @@ filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # greenGreenAdhesionMutl=$(bc <<< "scale=5; 0.37176*$Pe/$k")
 # redGreenAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
-k=$(bc <<< "scale=5; 2*$Pe")
+# k=$(bc <<< "scale=5; 2*$Pe")
 
 echo $filepath
 echo "stepLimit               : $stepLimit" > "$filepath" 

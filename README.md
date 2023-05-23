@@ -34,6 +34,20 @@ skippedSteps            : 0
 
 - For larger simulations use submit_batch.sh: Similarly to run_group.sh it allows you to generate paramter files for an array of values and then submit them all to the queue.
 
+# How the interactions work
+
+- Only pairwise interactions
+
+- When two cells touch each other (radius<=1) ComputeInteractions writes the contact index of the partner cell into cell.contactIdx, if neither has a currently a partner (cell.contactIdx=-1). It also saves the time that the contact took place at cell.contactTime. If DIFFERENTIAL_CIL is defined, this will only happen to opposite color particles.
+
+- If STICKY_CONTACTS is defined ComputeInteractions will apply a harmonic force that pulls cells to their current contact.
+
+- UpdateInternalStates checks if the cell has any contacts that are older than CIL_DELAY. If this is triggers ChangeDirection and makes the green cells more persistent. If NON_DIFFERENTIAL_PERSISTENCE is set it also makes red particles more persistent. It then resets cell.contactIndex and cell.contactTime to -1.
+
+- ChangeDirection orients the particles away from each other, if their last CIL event was more than CIL_COOLDOWN_COOLDOWN ago. It fully anti-aligns the cells if turnAround=1, and only partially anti-aligns them if turnAround<1. If TURN_AROUND_VARIATION is set, it will do so with a randomised angle. If ONLY_GREEN_CIL is set, only green particles will undergo the direction change. It then resets cell.cilCooldown for the cells, regardless of whether a CIL event actually took place.
+
+- UpdatePersistence also ticks down the timer for the increased persistence in each time step, until it reaches zero, when the persistence is put back to its default value.
+
 # Parameters
 
 The following parameters are given in the parameter file to set up the simulation:
