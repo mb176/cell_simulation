@@ -7,7 +7,7 @@ set -e
 if [ $# == 1 ]; then
     parameterFile="$1"
 else 
-    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.01/variations_with_smaller_timestep/A_0.4_Pe_100_no_cooldown"
+    parameterFile="/home/marius/PhD/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.01/vary_D/movies/D_3_persistentD_1_movie"
 fi
 
 #Genrate make file using cmake
@@ -32,11 +32,11 @@ fi
 
 
 
-# python3 /home/marius/PhD/CellMotility/analysis/animation_sim.py "${parameterFile}"
-# vlc "${parameterFile}.mov"
+python3 /home/marius/PhD/CellMotility/analysis/animation_sim.py "${parameterFile}"
+vlc "${parameterFile}.mov"
 
-python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
-python3 /home/marius/PhD/CellMotility/analysis/write_mixing_index_sim.py $parameterFile
+# python3 /home/marius/PhD/CellMotility/analysis/plot_last_frame_sim.py $parameterFile
+# python3 /home/marius/PhD/CellMotility/analysis/write_mixing_index_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/write_clustering_sim.py $parameterFile
 # python3 /home/marius/PhD/CellMotility/analysis/plot_mixing_index_sim.py $parameterFile
 

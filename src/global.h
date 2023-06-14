@@ -48,7 +48,7 @@ extern int nNeighbourPairs; // Current length of the neighbour list
 extern real simulationTime; //So that any function can access the current time of the simulation
 #ifdef MEASURE_COLLISION_ANGLE
 extern real collisionAngle;
-extern int nCollisions;
+extern unsigned long int nCollisions;
 extern real collisionDuration;
 #endif //MEASURE_COLLISION_ANGLE
 extern real maxTotalDisplacement; //Keeps track of the maximum any particle has moved, triggers updates of neighbour list

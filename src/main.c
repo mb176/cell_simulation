@@ -64,7 +64,7 @@ real simulationTime; //So that any function can access the current time of the s
 real maxTotalDisplacement=0; //Keeps track of the maximum any particle has moved, triggers updates of neighbour list
 #ifdef MEASURE_COLLISION_ANGLE
 real collisionAngle=0;
-int nCollisions=0;
+unsigned long int nCollisions=0;
 real collisionDuration=0; 
 #endif //MEASURE_COLLISION_ANGLE
 
@@ -119,8 +119,11 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
     printf("Particles are connected by harmonic spings while bonds last \n");
     fprintf(paramFile,"Particles are connected by harmonic spings while bonds last \n");
     #endif
-    printf("The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
-    fprintf(paramFile,"The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
+    // printf("The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
+    // fprintf(paramFile,"The maximum length of the neighborhood list is %i \n",MAX_NEIGHBOUR_PAIRS);
+
+    printf("The strength of the translational diffusion is set to %f \n", DIFFUSION_STRENGTH);
+    fprintf(paramFile,"The strength of the translational diffusion is set to %f \n", DIFFUSION_STRENGTH);
 
     #ifdef INITIAL_BLOB
     printf("The green particles are intialised in a blob in the center\n");

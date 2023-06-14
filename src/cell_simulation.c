@@ -83,14 +83,13 @@ void SetParameters(int argc, char** argv){
     redRedAdhesionMult = getNextParameter(paramFile,"redRedAdhesionMult");
     greenGreenAdhesionMutl = getNextParameter(paramFile,"greenGreenAdhesionMutl");
     redGreenAdhesionMult = getNextParameter(paramFile,"redGreenAdhesionMult");
-    printf("1 \n"); fflush(stdout);
     // Barricades
     //measurementInterval must be a multiple of stepDuration 
     assert((measurementInterval/stepDuration)-round(measurementInterval/stepDuration)< 1e-4);
     //The Simulation duration must be a multiple of measurementInterval
     assert((stepLimit-skipSteps)*(stepDuration/measurementInterval)-round((stepLimit-skipSteps)*(stepDuration/measurementInterval))<1e-4); 
     //Can't skip more steps than we have
-    assert(stepLimit>skipSteps);
+    assert(stepLimit>=skipSteps);
     //Need it least 20 steps, otherwise the loading bar divides by zero
     assert(stepLimit>=20);
 
@@ -415,11 +414,11 @@ void BuildNeighbourList(){
     int linearCellIdx1, linearCellIdx2;
     VecI offset[] = {{0,0},{0,1},{-1,0},{-1,1},{1,1}}; // Define cell index offsets that need to be scanned (only half of neighbours to avoid double counting)
     int nOffsets = 5;
-    nNeighbourPairs = 0;
     real neighbourRadiusSq = (potentialRange+CELL_SIZE_EXTENSION)*(potentialRange+CELL_SIZE_EXTENSION); //<= cellWidth^2
+    nNeighbourPairs = 0;
     //Go through all cells
-    for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
-        for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
+    for(int cellYIdx = 0; cellYIdx < cells.y; cellYIdx++){
+        for(int cellXIdx = 0; cellXIdx < cells.x; cellXIdx++){
             VSet(cellIdx1,cellXIdx,cellYIdx);
             //Go through this cell and its neighbouring cells
             for(int offsetIdx = 0; offsetIdx < nOffsets; offsetIdx++){
@@ -430,7 +429,7 @@ void BuildNeighbourList(){
                 //Go through all particles in the cells
                 for(int pIdx1 = cellList[linearCellIdx1]; pIdx1 >=0; pIdx1 = cellList[pIdx1]){
                     for(int pIdx2 = cellList[linearCellIdx2]; pIdx2 >=0; pIdx2 = cellList[pIdx2]){
-                        if(linearCellIdx1<linearCellIdx2 || (linearCellIdx1==linearCellIdx2 && pIdx2 < pIdx1)){ //Avoid double counting
+                        if(pIdx1!=pIdx2){//(linearCellIdx1<linearCellIdx2 || (linearCellIdx1==linearCellIdx2 && pIdx2 < pIdx1)){ //Avoid double counting
                             VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
                             VWrapAllTang(deltaR); //Apply periodic boundary condition
                             if(VLenSq(deltaR) < neighbourRadiusSq){ //WARNING: Assumes square cells/ regions
@@ -448,6 +447,7 @@ void BuildNeighbourList(){
     // printf("Neighbour list:");
     // for(int n=0; n<nNeighbourPairs; n++){printf("(%d,%d), ", neighbourList[2*n], neighbourList[2*n+1]);}
     // printf("\n");
+    // printf("nNeighbourPairs = %d\n", nNeighbourPairs);
 
 }
 
@@ -508,8 +508,8 @@ void ChangeDirection(int pIdx1, int pIdx2, VecR deltaR){
     if(particles[pIdx1].color!=0 && particles[pIdx1].cilCooldown<simulationTime){ particles[pIdx1].theta += deltaTheta1*turnAround;}
     if(particles[pIdx2].color!=0 && particles[pIdx2].cilCooldown<simulationTime){ particles[pIdx2].theta += deltaTheta2*turnAround;}
     #else
-    if(particles[pIdx1].cilCooldown<simulationTime){particles[pIdx1].theta += deltaTheta1*turnAround;}
-    if(particles[pIdx2].cilCooldown<simulationTime){particles[pIdx2].theta += deltaTheta2*turnAround;}
+    if(particles[pIdx1].cilCooldown<=simulationTime){particles[pIdx1].theta += deltaTheta1*turnAround;}
+    if(particles[pIdx2].cilCooldown<=simulationTime){particles[pIdx2].theta += deltaTheta2*turnAround;}
     #endif
 
     // Refresh CIL cooldown
@@ -545,14 +545,16 @@ void ComputeInteractions(){
     //Compute interactions:
     VecR deltaR;
     real distance, forceMagnitude, springForce;
+    // real maxForce = 0;
     int pairIdx, pIdx1, pIdx2;
     for(pairIdx = 0; pairIdx < nNeighbourPairs; pairIdx++){
         pIdx1 = neighbourList[2*pairIdx];
         pIdx2 = neighbourList[2*pairIdx+1];
         VSub(deltaR, particles[pIdx1].r,particles[pIdx2].r);
         VWrapAllTang(deltaR); //Apply periodic boundary condition
+        // printf("Distance: (%f,%f)",deltaR.x,deltaR.y);
         distance = sqrt(VLenSq(deltaR));
-        if(distance < 1){ //Do particles touch? (Warning: Needs to be changed )
+        if(distance < 1){ //Do particles touch? (Warning: assumes particle radius = 1)
             #ifdef DIFFERENTIAL_CIL
             //Add contacts index to both particles if they are of different type
             if ((particles[pIdx1].color==0 && particles[pIdx2].color!=0) || (particles[pIdx1].color!=0 && particles[pIdx2].color==0)){
@@ -595,7 +597,14 @@ void ComputeInteractions(){
                 VVSAdd(particles[pIdx2].force,-redGreenAdhesionMult*forceMagnitude,deltaR);
             }
         }
+        // if(fabs(forceMagnitude)>maxForce){
+        //     maxForce = fabs(forceMagnitude);
+        // }
+        
+
     }
+    // printf("Max force: %f, nCollisions: %d \n",maxForce, nCollisions);
+    // fflush(stdout);
                             
 
     #ifdef STICKY_CONTACTS
@@ -642,8 +651,8 @@ void EulerMaruyamaR(){
 
         //Noise (ToDo: Vectorise random number generation)
         xoshiro256ss_normal(noise, &rng);
-        displacement.x += rootStepDuration*root2*noise[0];
-        displacement.y += rootStepDuration*root2*noise[1];
+        displacement.x += DIFFUSION_STRENGTH*rootStepDuration*root2*noise[0];
+        displacement.y += DIFFUSION_STRENGTH*rootStepDuration*root2*noise[1];
 
         VVSAdd(particles[particleIdx].r,1,displacement);
 
@@ -651,10 +660,10 @@ void EulerMaruyamaR(){
     }
 
     maxTotalDisplacement += sqrt(maxDisplacementSq);
-    if(maxTotalDisplacement > 0.5 * CELL_SIZE_EXTENSION){// Can a new particle have moved within interaction distance?
+    if(maxTotalDisplacement >= 0.5 * CELL_SIZE_EXTENSION){// Can a new particle have moved within interaction distance?
         updateNeighbourList = 1;
     }
-    
+
     #ifdef DEBUG
     if(maxDisplacementSq>MAX_STEP_DISPLACEMENT*MAX_STEP_DISPLACEMENT){
         double max = MAX_STEP_DISPLACEMENT;
@@ -776,6 +785,8 @@ void UpdateInternalStates(){
 //End: Support Functions for Single Step
 void SingleStep (int stepIdx){
     if(updateNeighbourList==1){
+        printf("Update Neighbour List \n");
+        fflush(stdout);
         updateNeighbourList = 0;
         maxTotalDisplacement = 0;
         BuildNeighbourList();
@@ -797,6 +808,8 @@ void SingleStep (int stepIdx){
         MeasureVelocities(stepIdx*stepDuration);
         #endif
     }
+    fflush(stdout); //Flushes stdout
+    fflush(paramFile); //Flushes the buffer
 }
 
 void cleanup(){

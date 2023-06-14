@@ -9,13 +9,15 @@ skipSteps=0
 measurementInterval=1e5
 nGreenParticles=2000
 nRedParticles=2000
-areaFractionList=(0.8)
-redD=2
-greenD=2
-greenPersistentD=0
-kList=(0.001)
+areaFractionList=(0.4)
+# redD=2
+# greenD=2
+# greenPersistentD=0
+DList=(3 2.5 2 1.5 1 0.5 0.1)
+persistentDList=(2 1.5 1 0.5 0.1 0)
+kList=(0.01)
 tau=64
-PeList=(0.001 0.005 0.01 0.02 0.05 0.1 0.2 0.5 )
+PeList=(0.01)
 potentialRange=1.20978631683  #1.10868
 LennardJones=0
 turnAround=1
@@ -25,10 +27,11 @@ redGreenAdhesionMult=1
 
 # Choose simulation options
 sed -i "/#define DIFFERENTIAL_CIL/c\//#define DIFFERENTIAL_CIL" src/agent_simulation_config.h
+sed -i "/#define DIFFUSION_STRENGTH/c\#define DIFFUSION_STRENGTH 0.0" src/agent_simulation_config.h 
 sed -i "/#define CIL_DELAY/c\#define CIL_DELAY -1.0" src/agent_simulation_config.h
 sed -i "/#define STICKY_CONTACTS/c\// #define STICKY_CONTACTS" src/agent_simulation_config.h
 sed -i "/#define turnAroundVariation/c\// #define turnAroundVariation M_PI" src/agent_simulation_config.h
-sed -i "/#define CIL_COOLDOWN_DURATION/c\#define CIL_COOLDOWN_DURATION 0.02" src/agent_simulation_config.h
+sed -i "/#define CIL_COOLDOWN_DURATION/c\#define CIL_COOLDOWN_DURATION 64.0" src/agent_simulation_config.h
 sed -i "/#define NON_DIFFERENTIAL_PERSISTENCE/c\#define NON_DIFFERENTIAL_PERSISTENCE" src/agent_simulation_config.h
 
 # Choose initial conditions
@@ -40,7 +43,7 @@ sed -i "/#define INITIAL_PHASE_SEGREGATION/c\// #define INITIAL_PHASE_SEGREGATIO
 nReps=1
 
 
-TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.001"
+TARGET_FOLDER="/home/ma/m/mpb19/CellMotility/agent_simulation/output_23_05/recreate_RnT/k_0.01/vary_D"
 
 #Genrate make file using cmake
 cmake . -B build
@@ -49,13 +52,19 @@ cmake . -B build
 cmake --build build --config Debug #2>"${parameterFile}_error"
 
 #Loop over parameter values
+for D in "${DList[@]}"
+do
+greenD=$D
+redD=$D
+for greenPersistentD in "${persistentDList[@]}"
+do
 for Pe in "${PeList[@]}"
 do 
 for areaFraction in "${areaFractionList[@]}"
 do
 for k in "${kList[@]}"
 do
-filepath="${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
+filepath="${TARGET_FOLDER}/D_${D}_persistentD_${greenPersistentD}" #"${TARGET_FOLDER}/A_${areaFraction}_Pe_${Pe}"
 
 # # Write parameter file
 # redRedAdhesionMult=$(bc <<< "scale=5; 0.37176*$Pe/$k")
@@ -93,12 +102,9 @@ sed -i "/nReps=/c\nReps=${nReps}" run_cluster.sh
 #submit the job
 qsub run_cluster.sh
 
-
 done
 done
 done
-
-# Plot the mixing index
-# python3 ../analysis/plot_mixing_index_simulation.py "${TARGET_FOLDER}/mixingIndex"
-
+done
+done
 
