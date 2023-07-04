@@ -50,14 +50,14 @@ FILE * tracksFile;
 #ifdef TRACK_VELOCITIES
 FILE * velocityTracksFile;
 #endif
-FILE * paramFile;
+FILE * paramFile;   
 VecI cells; //Number of cells dividing the space in each coordinate for interaction computation
 int * cellList; //"Linked list" of length nParticle+nCells, first entries contain 
 //indices of next particle in the cell, the last entries contain indices to first 
 //particle in that cell
 int * neighbourList;
 int updateNeighbourList=1; // Set to one so that the list is build at the beginning of the simulation
-int nNeighbourPairs; 
+int nNeighbourPairs;
 
 // Extra observables
 real simulationTime; //So that any function can access the current time of the simulation

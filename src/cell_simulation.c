@@ -785,8 +785,6 @@ void UpdateInternalStates(){
 //End: Support Functions for Single Step
 void SingleStep (int stepIdx){
     if(updateNeighbourList==1){
-        printf("Update Neighbour List \n");
-        fflush(stdout);
         updateNeighbourList = 0;
         maxTotalDisplacement = 0;
         BuildNeighbourList();

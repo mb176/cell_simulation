@@ -5,10 +5,10 @@
 // Warning: Numbers need to be entered with decimal (1.0), so that they are printed correctly!
 
 //If defined CIL only happens in heterotypic  contacts, otherwise in all contacts (subject to the turnAround parameter being >0)
-//#define DIFFERENTIAL_CIL
+#define DIFFERENTIAL_CIL
 
 // Tunes the translational diffusion
-#define DIFFUSION_STRENGTH 0.0
+#define DIFFUSION_STRENGTH 1.0
 
 //How long is CIL delayed after contact? (-1) corresponds to no contact delay
 //Inspired from experiments we set the duration of contact to be half the duration of increased persistence
@@ -19,10 +19,9 @@
 
 // #define TURN_AROUND_VARIATION M_PI
 
-#define CIL_COOLDOWN_DURATION 0.0
-//0.0064
+#define CIL_COOLDOWN_DURATION 0
 
-#define NON_DIFFERENTIAL_PERSISTENCE
+//#define NON_DIFFERENTIAL_PERSISTENCE
 
 //////////////////////////////////////////////////////////// Alternative initialisations ////////////////////////////////////////////////////
 
