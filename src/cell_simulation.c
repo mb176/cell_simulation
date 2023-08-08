@@ -27,10 +27,10 @@ double getNextParameter(FILE * file, char * parameterName){
     if (fgets(line,MAX_LINE_LENGTH,file)) {
         sscanf(line, "%s : %s", name, value);
     } 
-    assert(strcmp(name,parameterName)==0); //Do the names match? If not it's an invalid parameter or parameter out of order or not enough parameters
     char * ptr; //Throughaway, needed to call strtod
     double val = strtod(value,&ptr);
     printf("%s = %f \n",name,val);
+    assert(strcmp(name,parameterName)==0); //Do the names match? If not it's an invalid parameter or parameter out of order or not enough parameters
     return val;
 }
 
@@ -494,9 +494,29 @@ void ChangeDirection(int pIdx1, int pIdx2, VecR deltaR){
 
 
     #ifdef TURN_AROUND_VARIATION 
-    // //Randomise the turn-around directions
-    deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
-    deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
+    //Randomise the turn-around directions to match the distributions seen in experiment
+
+    double noise[2];
+    xoshiro256ss_normal(noise, &rng);
+    double varianceHom = 2.04692214673895; // = 117.276/360*2*pi
+    double varianceHet = 1.6236798031303248; // = 93.03/360*2*pi
+    // deltaTheta1 = theta + 2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
+    // deltaTheta2 = theta + M_PI +2*(xoshire256ss_uniform(&rng)-0.5)*TURN_AROUND_VARIATION - particles[pIdx1].theta;
+    if(    (particles[pIdx1].color==0 && particles[pIdx2].color==0) //both red
+        || (particles[pIdx1].color!=0 && particles[pIdx2].color!=0))  {// both greeen
+        // Homotypic contact
+        noise[0] = noise[0]*sqrt(varianceHom);
+        noise[1] = noise[1]*sqrt(varianceHom);
+        printf("Hom Angles %f, %f \n", noise[0]/2/M_PI*360,noise[1]/2/M_PI*36);
+    } else {
+        // Heterotypic contact
+        noise[0] = noise[0]*sqrt(varianceHet);
+        noise[1] = noise[1]*sqrt(varianceHet);
+        printf("Het Angles %f, %f \n", noise[0]/2/M_PI*360,noise[1]/2/M_PI*360);
+    }
+    
+    deltaTheta1 = theta - particles[pIdx1].theta + noise[0];
+    deltaTheta2 = theta + M_PI - particles[pIdx2].theta + noise[1];
     #else
     deltaTheta1 = theta - particles[pIdx1].theta;
     deltaTheta2 = theta + M_PI - particles[pIdx2].theta;

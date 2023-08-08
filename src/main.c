@@ -83,10 +83,10 @@ The color scheme for measurements is red=0, green=1, green+ = 2;
 
     printf("Simulation configuration: \n");
     fprintf(paramFile,"Simulation configuration: \n");
-    #ifdef turnAroundVariation
-    double maxAngle = 360/(2*3.1416)*turnAroundVariation; 
-    printf("Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
-    fprintf(paramFile,"Randomised turn-around directions (maxAngle = +- %f) \n",maxAngle);
+    #ifdef TURN_AROUND_VARIATION
+    // double maxAngle = 360/(2*3.1416)*turnAroundVariation; 
+    printf("CIL angles are drawn from a Gaussian distribution \n");
+    fprintf(paramFile,"CIL angles are drawn from Gaussian distribution \n");
     #endif
 
     printf("After collisions particles form bonds that last %f time units before they trigger CIL.\n", CIL_DELAY);

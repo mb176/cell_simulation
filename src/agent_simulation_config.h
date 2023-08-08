@@ -17,9 +17,9 @@
 // Should particles be connected via harmonic springs while CIL is delayed?
 // #define STICKY_CONTACTS
 
-// #define TURN_AROUND_VARIATION M_PI
+#define TURN_AROUND_VARIATION
 
-#define CIL_COOLDOWN_DURATION 0
+//#define CIL_COOLDOWN_DURATION tau
 
 //#define NON_DIFFERENTIAL_PERSISTENCE
 
